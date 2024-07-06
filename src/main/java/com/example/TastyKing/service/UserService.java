@@ -94,6 +94,17 @@ public class UserService {
         }
         return false;
     }
+    public boolean verifyEmail(String email, String otp) {
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+        if (user.getOtp().equals(otp) &&
+                Duration.between(user.getGenerateOtpTime(), LocalDateTime.now()).getSeconds() < 60) {
+            user.setActive(true);
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
     public String regenerateOtp(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
         String otp = otpUtil.generateOtp();

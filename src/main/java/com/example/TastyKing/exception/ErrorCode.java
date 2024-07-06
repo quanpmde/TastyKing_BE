@@ -28,7 +28,13 @@ public enum ErrorCode {
     INVALID_NUM_OF_CHAIR(1020, "Number of chair must be at least 2 chairs", HttpStatus.BAD_REQUEST),
     TABLE_NOT_EXIST(1021,"Table has not exist" ,HttpStatus.BAD_REQUEST ),
     VOUCHER_NOT_EXIST(1022,"Voucher has not exist" ,HttpStatus.BAD_REQUEST ),
-    VOUCHER_HAS_EXISTED(1023,"Voucher has existed" ,HttpStatus.BAD_REQUEST );
+    VOUCHER_HAS_EXISTED(1023,"Voucher has existed" ,HttpStatus.BAD_REQUEST ),
+    ORDER_NOT_EXIST(1024, "Order has not exist", HttpStatus.BAD_REQUEST ),
+    CANNOT_CANCEL_ORDER(1025,"Cannot cancel order within 24 hours of booking date" ,HttpStatus.BAD_REQUEST),
+    POINT_EMPTY(1026,"User does not have any reward points." ,HttpStatus.BAD_REQUEST ),
+    POINT_NOT_ENOUGH(1027,"User does not have enough reward points." ,HttpStatus.BAD_REQUEST ),
+    VOUCHER_NOT_ENOUGH(1028,"Voucher is out of stock." ,HttpStatus.BAD_REQUEST ),
+    EXCHANGE_NOT_EXIST(1029, "Voucher exchange does not exist",HttpStatus.BAD_REQUEST );
     private int code;
     private String message;
     private HttpStatusCode statusCode;

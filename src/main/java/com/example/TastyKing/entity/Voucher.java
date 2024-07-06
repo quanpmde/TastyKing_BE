@@ -1,11 +1,10 @@
 package com.example.TastyKing.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,9 +12,10 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @Entity
+@Table(name = "voucher", uniqueConstraints = @UniqueConstraint(columnNames = "VoucherId"))
 public class Voucher {
     @Id
-    @Column(name = "VoucherId", length = 50)
+    @Column(name = "VoucherId", length = 50, unique = true)
     private String voucherId;
 
     @Column(name = "VoucherTitle", nullable = false, length = 100)
@@ -47,4 +47,8 @@ public class Voucher {
 
     @Column(name = "IsExpired")
     private boolean isExpired;
+
+    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VoucherExchange> voucherExchanges;
+
 }

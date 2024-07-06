@@ -83,6 +83,11 @@ public class TableService {
                 .map(tableMapper::toTableResponse)
                 .collect(Collectors.toList());
     }
+
+    public TableResponse getTableByTableID(Long tableID) {
+        Tables tables = tableRepository.findById(tableID).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+        return tableMapper.toTableResponse(tables);
+    }
 }
 
 

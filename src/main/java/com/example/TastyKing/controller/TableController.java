@@ -58,5 +58,12 @@ public class TableController {
                 .build();
     }
 
+    @GetMapping("/getTable/{tableID}")
+    public ApiResponse<TableResponse> getTableByTableID(@PathVariable("tableID") Long tableID){
+        return ApiResponse.<TableResponse>builder()
+                .result(tableService.getTableByTableID(tableID))
+                .build();
+    }
+
 }
 

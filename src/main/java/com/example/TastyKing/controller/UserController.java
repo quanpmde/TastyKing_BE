@@ -87,7 +87,7 @@ public class UserController {
     }
     @PutMapping("/verify-email")
     public ApiResponse<String> verifyAccountToChangePass(@RequestBody OtpRequest otpRequest){
-        boolean isVerified = userService.verifyOtp(otpRequest.getEmail(), otpRequest.getOtp());
+        boolean isVerified = userService.verifyEmail(otpRequest.getEmail(), otpRequest.getOtp());
         if (isVerified) {
 //            return new ResponseEntity<>("OTP verified successfully.", HttpStatus.OK);
             return ApiResponse.<String>builder()

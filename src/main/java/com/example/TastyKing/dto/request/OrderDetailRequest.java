@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class ComboFoodRequest {
+public class OrderDetailRequest {
     private Long foodID;
     private int quantity;
 }

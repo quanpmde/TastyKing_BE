@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,15 +15,15 @@ import java.time.LocalDateTime;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class User {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
- @Column(name = "UserID")
+ @Column(name = "userid")
  int userId;
 
- @Column(name = "fullname", length = 255)
+ @Column(name = "fullname", length = 255, unique = true)
  String fullName;
 
  @Column(name = "username", length = 50)
@@ -48,5 +49,7 @@ String email;
 
  @Column(name = "generateotptime")
  LocalDateTime generateOtpTime;
+ @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+ private List<VoucherExchange> voucherExchanges;
 
 }

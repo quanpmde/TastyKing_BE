@@ -4,7 +4,9 @@ package com.example.TastyKing.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,15 +28,12 @@ public class Order {
     @JoinColumn(name = "tableID", nullable = false)
     private Tables table;
 
-    @ManyToOne
-    @JoinColumn(name = "voucherId", nullable = true)
-    private Voucher voucher;
 
     @Column(name = "orderStatus", length = 50)
     private String orderStatus;
 
     @Column(name = "orderDate", nullable = false)
-    private LocalDate orderDate;
+    private LocalDateTime orderDate;
 
     @Column(name = "note", length = 1000)
     private String note;
@@ -42,15 +41,17 @@ public class Order {
     @Column(name = "totalAmount", nullable = false)
     private Double totalAmount;
 
-    @Column(name = "numOfCustomer", nullable = false)
+    @Column(name = "numOfCustomer")
     private int numOfCustomer;
 
-    @Column(name = "customerName", nullable = false, length = 255)
+    @Column(name = "customerName", length = 255)
     private String customerName;
 
-    @Column(name = "bookingDate", nullable = false)
-    private LocalDate bookingDate;
+    @Column(name = "bookingDate")
+    private LocalDateTime bookingDate;
 
-    @Column(name = "customerPhone", nullable = false, length = 255)
+    @Column(name = "customerPhone", length = 255)
     private String customerPhone;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderDetail> orderDetails;
 }

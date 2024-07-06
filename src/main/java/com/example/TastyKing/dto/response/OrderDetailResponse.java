@@ -1,6 +1,6 @@
-package com.example.TastyKing.request;
+package com.example.TastyKing.dto.response;
 
-import com.example.TastyKing.entity.Category;
+import com.example.TastyKing.entity.Food;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,24 +10,10 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class FoodUpdateRequest
-{
-    private Category category;
-
-
+public class OrderDetailResponse {
+    private Long foodID;
     private String foodName;
-
-
     private Double foodPrice;
-
-
-    private Double foodCost;
-
-
-    private String description;
-
-    private String unit;
-
-
     private String foodImage;
+    private int quantity;
 }
