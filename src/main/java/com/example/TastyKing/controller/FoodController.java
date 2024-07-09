@@ -5,9 +5,11 @@ import com.example.TastyKing.dto.request.FoodRequest;
 import com.example.TastyKing.dto.request.UpdateFoodRequest;
 import com.example.TastyKing.dto.response.ApiResponse;
 import com.example.TastyKing.dto.response.FoodResponse;
+import com.example.TastyKing.dto.response.ReviewResponse;
 import com.example.TastyKing.service.FoodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,5 +63,12 @@ public class FoodController {
             return ApiResponse.<FoodResponse>builder()
                     .result(foodService.getFoodByFoodID(foodID))
                     .build();
+    }
+
+    @GetMapping("/getReview/{foodID}")
+    public ApiResponse<List<ReviewResponse>> getReviewOfFoodItem(@PathVariable("foodID") Long foodID){
+        return ApiResponse.<List<ReviewResponse>>builder()
+                .result(foodService.getAllReviewOfFoodItem(foodID))
+                .build();
     }
 }

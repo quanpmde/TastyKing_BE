@@ -8,4 +8,6 @@ import java.util.List;
 public interface TableRepository extends JpaRepository<Tables, Long> {
 
     List<Tables> findByTablePosition_TablePositionID(Long tablePositionID);
+
+    List<Tables> findByTableStatus(String available);
 }

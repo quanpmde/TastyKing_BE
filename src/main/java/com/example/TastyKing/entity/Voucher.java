@@ -1,5 +1,7 @@
 package com.example.TastyKing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "voucher", uniqueConstraints = @UniqueConstraint(columnNames = "VoucherId"))
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "voucherExchanges"})
 public class Voucher {
     @Id
     @Column(name = "VoucherId", length = 50, unique = true)
@@ -48,7 +51,5 @@ public class Voucher {
     @Column(name = "IsExpired")
     private boolean isExpired;
 
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<VoucherExchange> voucherExchanges;
-
+    
 }

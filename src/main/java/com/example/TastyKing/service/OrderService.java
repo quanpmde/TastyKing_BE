@@ -317,6 +317,31 @@ public class OrderService {
             throw new RuntimeException("Failed to confirm order", ex);
         }
     }
+    @Transactional(rollbackFor = Exception.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    public String receiveTable(Long orderID) {
+
+        // Fetch the existing order
+        Order order = orderRepository.findById(orderID)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+
+        // Check if booking date is greater than current time
+        if (order.getBookingDate().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_BOOKING_TIME); // Custom exception for invalid time
+        }
+
+        // Update the order status to "Confirmed"
+        order.setOrderStatus(OrderStatus.InProgress.name());
+
+        Tables table = order.getTable();
+        table.setTableStatus("Serving");
+        tableRepository.save(table);
+
+        // Save the updated order
+        Order updatedOrder = orderRepository.save(order);
+
+        return "The customer has successfully received the table.";
+    }
 
 
     @Transactional(rollbackFor = Exception.class)

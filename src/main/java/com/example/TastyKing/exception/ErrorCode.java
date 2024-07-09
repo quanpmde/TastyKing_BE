@@ -34,7 +34,11 @@ public enum ErrorCode {
     POINT_EMPTY(1026,"User does not have any reward points." ,HttpStatus.BAD_REQUEST ),
     POINT_NOT_ENOUGH(1027,"User does not have enough reward points." ,HttpStatus.BAD_REQUEST ),
     VOUCHER_NOT_ENOUGH(1028,"Voucher is out of stock." ,HttpStatus.BAD_REQUEST ),
-    EXCHANGE_NOT_EXIST(1029, "Voucher exchange does not exist",HttpStatus.BAD_REQUEST );
+    EXCHANGE_NOT_EXIST(1029, "Voucher exchange does not exist",HttpStatus.BAD_REQUEST ),
+    REWARD_NO_EXIST(1030,"Reward point does not exist" ,HttpStatus.BAD_REQUEST),
+    USER_HAS_NOT_EXCHANGED_VOUCHER(1031,"User has not exchanged this voucher.", HttpStatus.BAD_REQUEST),
+    INVALID_BOOKING_TIME(1032, "Can not receive table. Please wait", HttpStatus.BAD_REQUEST),
+    RATING_INVALID(1033, "Rating must be greater than 1", HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

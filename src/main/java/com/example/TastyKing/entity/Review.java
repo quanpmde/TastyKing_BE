@@ -3,35 +3,40 @@ package com.example.TastyKing.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-
 
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 @Entity
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "voucherexchange")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class VoucherExchange {
+@Table(name = "review")
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "VoucherExchangeID")
-    private Long voucherExchangeId;
+    @Column(name = "ReviewID")
+    private Integer reviewId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "VoucherID", nullable = false)
-    private Voucher voucher;
+    @JoinColumn(name = "FoodID", nullable = false)
+    private Food food;
 
-    @Column(name = "ExchangeDate", nullable = false)
-    private LocalDateTime exchangeDate;
+    @Column(name = "ReviewText", columnDefinition = "TEXT")
+    private String reviewText;
+
+    @Column(name = "Rating")
+    private int rating;
+
+    @Column(name = "ReviewDate")
+    private LocalDateTime reviewDate;
+
+    // Constructors, getters, and setters
 }

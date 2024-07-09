@@ -1,11 +1,14 @@
 package com.example.TastyKing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "voucherExchanges"})
 public class User {
 
  @Id
@@ -49,7 +52,7 @@ String email;
 
  @Column(name = "generateotptime")
  LocalDateTime generateOtpTime;
- @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
- private List<VoucherExchange> voucherExchanges;
+
+
 
 }

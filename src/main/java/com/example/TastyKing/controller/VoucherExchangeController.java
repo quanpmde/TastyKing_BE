@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/voucherExchange")
 @RequiredArgsConstructor
-@CrossOrigin("*")
+@CrossOrigin("*")   
 public class VoucherExchangeController {
     @Autowired
     private VoucherExchangeService voucherExchangeService;

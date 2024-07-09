@@ -56,4 +56,11 @@ public class VoucherController {
                 .result(voucherService.getVoucherByVoucherID(voucherID))
                 .build();
     }
+
+    @GetMapping("/apply/{voucherID}")
+    public ApiResponse<VoucherResponse> applyVoucher(@PathVariable("voucherID") String voucherID, @RequestParam String email){
+        return ApiResponse.<VoucherResponse>builder()
+                .result(voucherService.applyVoucher(voucherID, email))
+                .build();
+    }
 }

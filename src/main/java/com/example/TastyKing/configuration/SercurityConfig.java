@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity
 public class SercurityConfig {
     private final String[] PUBLIC_ENDPOINTS ={"/users/register","/users/verify-account", "/users/sendOTP", "/users/verify-email",
-            "/users/regenerate-otp","/auth/login", "/category", "/food",
+            "/users/regenerate-otp","/auth/login", "/food",
             "/food/{categoryID}", "/food/getFood/{foodID}",
             "/combo", "/combo/getCombo/{comboID}", "/table-position", "/table/{tablePositionID}", "/table/getTable/{tableID}",
             "/voucher", "/voucher/{voucherID}", "/order"
@@ -39,8 +39,9 @@ public class SercurityConfig {
                         .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINTS).permitAll()
                          .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.PUT, "/users/change-pass/{email}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/category").permitAll()
                         .requestMatchers(HttpMethod.GET, "/combo").permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/food/getReview/{foodID}").permitAll()
 
                         .anyRequest()
                         .authenticated()

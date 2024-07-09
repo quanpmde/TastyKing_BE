@@ -81,4 +81,11 @@ public class OrderController {
                 .result(orderService.updateOrder(request))
                 .build();
     }
+
+    @PutMapping("/receiveTable/{orderID}")
+    public ApiResponse<String> receiveTable(@PathVariable("orderID") Long orderID){
+        return ApiResponse.<String>builder()
+                .result(orderService.receiveTable(orderID))
+                .build();
+    }
 }

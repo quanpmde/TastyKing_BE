@@ -15,7 +15,7 @@ public class RewardPoint {
     private int rewardID;
 
     @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "userID", nullable = false , unique = true)
     private User user;
 
 

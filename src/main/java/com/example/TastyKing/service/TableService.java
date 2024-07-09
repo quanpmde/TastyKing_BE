@@ -88,6 +88,15 @@ public class TableService {
         Tables tables = tableRepository.findById(tableID).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
         return tableMapper.toTableResponse(tables);
     }
+
+
+    public List<TableResponse> getTableHasStatusAvailable(){
+        List<Tables> tables = tableRepository.findByTableStatus("Available");
+        return tables.stream()
+                .map(tableMapper::toTableResponse)
+                .collect(Collectors.toList());
+    }
+
 }
 
 

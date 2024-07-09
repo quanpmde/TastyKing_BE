@@ -4,14 +4,17 @@ package com.example.TastyKing.service;
 import com.example.TastyKing.dto.request.FoodRequest;
 import com.example.TastyKing.dto.request.UpdateFoodRequest;
 import com.example.TastyKing.dto.response.FoodResponse;
+import com.example.TastyKing.dto.response.ReviewResponse;
 import com.example.TastyKing.entity.Category;
 import com.example.TastyKing.entity.Food;
+import com.example.TastyKing.entity.Review;
 import com.example.TastyKing.exception.AppException;
 import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.mapper.FoodMapper;
 import com.example.TastyKing.repository.CategoryRepository;
 import com.example.TastyKing.repository.FoodRepository;
 
+import com.example.TastyKing.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +32,8 @@ public class FoodService {
         private final FoodMapper foodMapper;
         @Autowired
         private final CategoryRepository categoryRepository;
-
+        @Autowired
+        private final ReviewRepository reviewRepository;
 
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -81,5 +85,20 @@ public class FoodService {
            Food food = foodRepository.findById(foodID).orElseThrow(() ->
                    new AppException(ErrorCode.FOOD_NOT_EXIST));
            return foodMapper.toFoodResponse(food);
+        }
+
+        public List<ReviewResponse> getAllReviewOfFoodItem(Long foodID){
+            Food food = foodRepository.findById(foodID).orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_EXIST));
+            List<Review> reviews = reviewRepository.findAllByFood(food);
+            return reviews.stream()
+                    .map(review -> ReviewResponse.builder()
+                            .reviewId(review.getReviewId())
+                            .user(review.getUser())
+                            .food(review.getFood())
+                            .reviewText(review.getReviewText())
+                            .rating(review.getRating())
+                            .reviewDate(review.getReviewDate())
+                            .build())
+                    .collect(Collectors.toList());
         }
     }

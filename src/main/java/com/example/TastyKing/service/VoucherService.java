@@ -4,10 +4,14 @@ import com.example.TastyKing.dto.request.UpdateVoucherRequest;
 import com.example.TastyKing.dto.request.VoucherRequest;
 import com.example.TastyKing.dto.response.VoucherResponse;
 import com.example.TastyKing.entity.Combo;
+import com.example.TastyKing.entity.User;
 import com.example.TastyKing.entity.Voucher;
+import com.example.TastyKing.entity.VoucherExchange;
 import com.example.TastyKing.exception.AppException;
 import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.mapper.VoucherMapper;
+import com.example.TastyKing.repository.UserRepository;
+import com.example.TastyKing.repository.VoucherExchangeRepository;
 import com.example.TastyKing.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +38,10 @@ public class VoucherService {
     private VoucherRepository voucherRepository;
     @Autowired
     private VoucherMapper voucherMapper;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private VoucherExchangeRepository voucherExchangeRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
     public VoucherResponse createVoucher(VoucherRequest request) throws IOException {
@@ -113,4 +122,35 @@ public class VoucherService {
     }
 
 
+    public VoucherResponse applyVoucher(String voucherId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+
+        Voucher voucher = voucherRepository.findByVoucherId(voucherId)
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
+
+        Optional<VoucherExchange> optionalVoucherExchange = voucherExchangeRepository
+                .findTopByUserAndVoucherOrderByExchangeDateDesc(user, voucher);
+
+        if (optionalVoucherExchange.isEmpty()) {
+            throw new AppException(ErrorCode.USER_HAS_NOT_EXCHANGED_VOUCHER);
+        }
+
+        if (voucher.getNumberVoucherUsed() >= voucher.getVoucherQuantity()) {
+            throw new AppException(ErrorCode.VOUCHER_NOT_ENOUGH);
+        }
+
+        // Increment the number of times this voucher has been used
+        voucher.setNumberVoucherUsed(voucher.getNumberVoucherUsed() + 1);
+        voucherRepository.save(voucher);
+
+        // Remove the voucher exchange record with the nearest exchange date
+        VoucherExchange voucherExchange = optionalVoucherExchange.get();
+        voucherExchangeRepository.delete(voucherExchange);
+
+        return voucherMapper.toVoucherResponse(voucher);
+    }
+
+
 }
+

@@ -65,5 +65,11 @@ public class TableController {
                 .build();
     }
 
+      @GetMapping("/getTable/available")
+    public ApiResponse<List<TableResponse>> getTableHasStatusAvailable(){
+        return ApiResponse.<List<TableResponse>>builder()
+                .result(tableService.getTableHasStatusAvailable())
+                .build();
+          }
 }
 
