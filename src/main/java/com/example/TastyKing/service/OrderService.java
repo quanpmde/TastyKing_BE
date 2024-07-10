@@ -13,9 +13,7 @@ import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.repository.*;
 import com.example.TastyKing.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -24,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -424,6 +420,98 @@ public class OrderService {
                 order.setOrderDetails(orderDetails);
             }
 
+            Order savedOrder = orderRepository.save(order);
+
+            return OrderResponse.builder()
+                    .orderID(savedOrder.getOrderID())
+                    .user(savedOrder.getUser())
+                    .tables(savedOrder.getTable())
+                    .orderDate(savedOrder.getOrderDate())
+                    .note(savedOrder.getNote())
+                    .totalAmount(savedOrder.getTotalAmount())
+                    .numOfCustomer(savedOrder.getNumOfCustomer())
+                    .customerName(savedOrder.getCustomerName())
+                    .bookingDate(savedOrder.getBookingDate())
+                    .customerPhone(savedOrder.getCustomerPhone())
+                    .orderStatus(savedOrder.getOrderStatus())
+                    .orderDetails(savedOrder.getOrderDetails().stream()
+                            .map(detail -> OrderDetailResponse.builder()
+                                    .foodID(detail.getFood().getFoodID())
+                                    .foodName(detail.getFood().getFoodName())
+                                    .foodPrice(detail.getFood().getFoodPrice())
+                                    .foodImage(detail.getFood().getFoodImage())
+                                    .quantity(detail.getQuantity())
+                                    .build())
+                            .collect(Collectors.toList()))
+                    .build();
+        } catch (Exception ex) {
+            logger.error("Error occurred while creating order: {}", ex.getMessage());
+            throw new RuntimeException("Failed to create order", ex);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    public OrderResponse createOrderByAdmin(OrderRequest request) {
+        try {
+            User user = userRepository.findByEmail(request.getUser().getEmail())
+                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+
+            Tables tables = tableRepository.findById(request.getTables().getTableID())
+                    .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+
+
+            Order order;
+            if (request.getOrderID() != null) {
+                // Update existing order
+                order = orderRepository.findById(request.getOrderID())
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+                // Update order details if necessary (e.g., update total amount)
+                order.setTotalAmount(order.getTotalAmount() + request.getTotalAmount());
+                order.setOrderDate(LocalDateTime.now());
+                order.setNote(request.getNote());
+                order.setNumOfCustomer(request.getNumOfCustomer());
+                order.setCustomerName(request.getCustomerName());
+                order.setBookingDate(request.getBookingDate());
+                order.setCustomerPhone(request.getCustomerPhone());
+            } else {
+                // Create new order
+                order = Order.builder()
+                        .user(user)
+                        .table(tables)
+                        .orderDate(LocalDateTime.now())
+                        .note(request.getNote())
+                        .totalAmount(request.getTotalAmount())
+                        .numOfCustomer(request.getNumOfCustomer())
+                        .customerName(request.getCustomerName())
+                        .bookingDate(request.getBookingDate())
+                        .customerPhone(request.getCustomerPhone())
+                        .orderStatus(OrderStatus.InProgress.name())
+                        .build();
+            }
+
+            List<OrderDetail> orderDetails = request.getOrderDetails().stream()
+                    .map(detail -> {
+                        OrderDetailId detailId = new OrderDetailId(order.getOrderID(), detail.getFoodID());
+                        Food food = foodRepository.findById(detail.getFoodID())
+                                .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_EXIST));
+                        return OrderDetail.builder()
+                                .id(detailId)
+                                .order(order)
+                                .food(food)
+                                .quantity(detail.getQuantity())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            if (order.getOrderDetails() != null) {
+                order.getOrderDetails().addAll(orderDetails);
+            } else {
+                order.setOrderDetails(orderDetails);
+            }
+            Tables table = order.getTable();
+            table.setTableStatus("Serving");
+            tableRepository.save(table);
             Order savedOrder = orderRepository.save(order);
 
             return OrderResponse.builder()

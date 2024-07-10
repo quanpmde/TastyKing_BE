@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -25,7 +26,7 @@ public class FoodController {
 
 
     @PostMapping
-    public ApiResponse<FoodResponse> addNewFood(@RequestBody FoodRequest foodRequest) {
+    public ApiResponse<FoodResponse> addNewFood(@ModelAttribute @RequestBody FoodRequest foodRequest) throws IOException {
         return ApiResponse.<FoodResponse>builder()
                 .result(foodService.addFood(foodRequest))
                 .build();
@@ -52,7 +53,7 @@ public class FoodController {
     }
 
     @PutMapping("/{foodID}")
-    public ApiResponse<FoodResponse> updateFood(@PathVariable("foodID") Long foodID, @RequestBody UpdateFoodRequest request) {
+    public ApiResponse<FoodResponse> updateFood(@PathVariable("foodID") Long foodID, @RequestBody @ModelAttribute UpdateFoodRequest request) throws IOException {
         return ApiResponse.<FoodResponse>builder()
                 .result(foodService.updateFood(foodID, request))
                 .build();

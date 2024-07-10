@@ -64,6 +64,37 @@ public class UserService {
         return "To verify this is your email account, we will send a confirmation code to this email. Please check your email to receive the verification code to activate your account";
 
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createNewCustomerByAdmin(CreateNewCustomerRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        User user = new User();
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUserName(request.getEmail());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+
+        if (request.getStatus().equalsIgnoreCase("Active")) {
+            user.setActive(true);
+            try {
+                emailUtil.sendActiveAccount(request.getEmail(), request.getPassword());
+            } catch (MessagingException e) {
+                throw new RuntimeException("Unable to send activation email, please try again", e);
+            }
+            user.setGenerateOtpTime(LocalDateTime.now());
+            user.setRole(Role.USER.name());
+            userRepository.save(user);
+            return "New account has been created and activated.";
+        } else {
+            user.setActive(false);
+            userRepository.save(user);
+            return "Account has been created. Please verify email to activate.";
+        }
+    }
     public String sendOTP(SendOTPRequest sendOTPRequest){
         User user = userRepository.findByEmail(sendOTPRequest.getEmail()).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
         String otp = otpUtil.generateOtp();

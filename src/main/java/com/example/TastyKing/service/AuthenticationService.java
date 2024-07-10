@@ -33,6 +33,9 @@ public class AuthenticationService {
                 () -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)
 
         );
+        if(!user.isActive()){
+            throw new AppException(ErrorCode.EMAIL_NOT_EXISTED);
+        }
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
         if (!authenticated)
             throw new AppException(ErrorCode.LOGIN_FAILED);

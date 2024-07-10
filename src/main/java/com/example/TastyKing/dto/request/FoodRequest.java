@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FoodRequest {
 
-    private Category category;
+    private Long categoryID;
 
 
     private String foodName;
@@ -30,8 +31,8 @@ public class FoodRequest {
     private String unit;
 
 
-    private String foodImage;
-    private String foodImage2;
-    private String foodImage3;
+    private MultipartFile foodImage;
+//    private MultipartFile foodImage2;
+//    private MultipartFile foodImage3;
 }
 

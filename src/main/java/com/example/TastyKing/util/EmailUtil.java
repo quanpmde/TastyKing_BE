@@ -49,4 +49,23 @@ public class EmailUtil {
                 """, orderId), true);
         javaMailSender.send(mimeMessage);
     }
+
+    public void sendActiveAccount(String email, String password) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        mimeMessageHelper.setFrom("tuandoiphuyen@gmail.com");
+        mimeMessageHelper.setTo(email);
+        mimeMessageHelper.setSubject("Active account");
+        mimeMessageHelper.setText(String.format("""
+                <div>
+                    Tasty King restaurant</br>
+                    Your account has been actived.  Your Password: <strong>%s</strong>
+
+             
+                    Thank you
+                    
+                </div>
+                """, password), true);
+        javaMailSender.send(mimeMessage);
+    }
 }

@@ -19,13 +19,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FoodService {
+    private static final String UPLOAD_DIR = "D:\\FPT U\\FU-SU24\\SWP391\\TastyKing-FE\\img\\";
         @Autowired
         private final FoodRepository foodRepository;
         @Autowired
@@ -37,14 +43,29 @@ public class FoodService {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-        public FoodResponse addFood(FoodRequest foodRequest) {
+        public FoodResponse addFood(FoodRequest foodRequest) throws IOException {
+        String relativeImagePath = saveImage(foodRequest.getFoodImage());
             Food food = foodMapper.toFood(foodRequest);
-            Category category = categoryRepository.findById(foodRequest.getCategory().getCategoryID())
+            Category category = categoryRepository.findById(foodRequest.getCategoryID())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXIST));
             food.setCategory(category);
+            food.setFoodImage(relativeImagePath);
             Food savedFood = foodRepository.save(food);
             return foodMapper.toFoodResponse(savedFood);
         }
+
+    private String saveImage(MultipartFile image) throws IOException {
+        if (image != null && !image.isEmpty()) {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            String imagePath = UPLOAD_DIR + image.getOriginalFilename();
+            Files.write(Paths.get(imagePath), image.getBytes());
+            return "img/" + image.getOriginalFilename();
+        }
+        return null;
+    }
 
         public List<FoodResponse> getAllFood() {
             List<Food> foods = foodRepository.findAll();
@@ -66,15 +87,16 @@ public class FoodService {
         }
 
     @PreAuthorize("hasRole('ADMIN')")
-        public FoodResponse updateFood(Long foodID, UpdateFoodRequest request) {
+        public FoodResponse updateFood(Long foodID, UpdateFoodRequest request) throws IOException{
+        String relativeImagePath = saveImage(request.getFoodImage());
             Food food = foodRepository.findById(foodID).orElseThrow(() ->
                     new AppException(ErrorCode.FOOD_NOT_EXIST));
-            Category category = categoryRepository.findById(request.getCategory().getCategoryID())
+            Category category = categoryRepository.findById(request.getCategoryID())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXIST));
             food.setCategory(category);
             food.setFoodName(request.getFoodName());
             food.setFoodCost(request.getFoodCost());
-            food.setFoodImage(request.getFoodImage());
+            food.setFoodImage(relativeImagePath);
             food.setDescription(request.getDescription());
             food.setFoodPrice(request.getFoodPrice());
             food.setUnit(request.getUnit());

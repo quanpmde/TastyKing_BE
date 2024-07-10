@@ -6,17 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UpdateFoodRequest {
-    private Category category;
+    private Long categoryID;
 
 
     private String foodName;
-
 
     @DecimalMin(value = "0.0", inclusive = false, message = "PRICE_INVALID")
     private Double foodPrice;
@@ -30,7 +30,6 @@ public class UpdateFoodRequest {
     private String unit;
 
 
-    private String foodImage;
-    private String foodImage2;
-    private String foodImage3;
+    private MultipartFile foodImage;
+
 }

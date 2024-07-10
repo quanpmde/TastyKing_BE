@@ -33,6 +33,13 @@ public class OrderController {
                 .result(orderService.createOrder(request))
                 .build();
     }
+    @PostMapping("/admin")
+    public ApiResponse<OrderResponse> createOrderByAdmin(@RequestBody @Valid OrderRequest request){
+        logger.info("Received order request: {}", request);
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.createOrderByAdmin(request))
+                .build();
+    }
     @GetMapping("/{orderID}")
     public ApiResponse<OrderResponse> getOrderByOrderID(@PathVariable Long orderID) {
         return ApiResponse.<OrderResponse>builder()

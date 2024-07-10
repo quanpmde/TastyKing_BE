@@ -29,6 +29,12 @@ public class UserController {
                     .result(userService.createNewUser(request))
                     .build();
     }
+    @PostMapping("/account")
+    public ApiResponse<String> createCustomerAccount(@RequestBody @Valid CreateNewCustomerRequest request){
+        return ApiResponse.<String>builder()
+                .result(userService.createNewCustomerByAdmin(request))
+                .build();
+    }
     @PostMapping("/sendOTP")
     public ApiResponse<String> sendOTP(@RequestBody SendOTPRequest sendOTPRequest){
         return ApiResponse.<String>builder()
