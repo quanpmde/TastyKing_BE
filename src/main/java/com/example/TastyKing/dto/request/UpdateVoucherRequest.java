@@ -15,13 +15,14 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UpdateVoucherRequest {
 
-    private String voucherTitle;
-    private int voucherDiscount;
-    private int voucherQuantity;
-    private Double voucherExchangePoint;
+
+    private String updateVoucherTitle;
+    private int updateDiscount;
+    private int updateQuantity;
+    private Double updateExchangePoint;
     @OpenDateConstraint(message = "OPEN_DATE_INVALID")
-    private LocalDateTime voucherStartDate;
-    private LocalDateTime voucherDueDate;
-    private MultipartFile voucherImage;
-    private String voucherDescribe;
+    private LocalDateTime updateOpenDate;
+    private LocalDateTime updateEndDate;
+    private MultipartFile updateVoucherImage;
+    private String updateDescription;
 }

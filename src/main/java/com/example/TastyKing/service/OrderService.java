@@ -250,9 +250,12 @@ public class OrderService {
         }
 
         // Cập nhật trạng thái đơn hàng nếu hủy hợp lệ
-        order.setOrderStatus(OrderStatus.Canceled.name());
-        Order updatedOrder = orderRepository.save(order);
+        Tables tables = tableRepository.findById(order.getTable().getTableID()).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
 
+        order.setOrderStatus(OrderStatus.Canceled.name());
+        tables.setTableStatus("Available");
+        Order updatedOrder = orderRepository.save(order);
+        Tables tablesUpdate = tableRepository.save(tables);
         // Trả về phản hồi sau khi hủy đơn hàng thành công
         return "The order was successfully canceled. Please contact the restaurant for refund assistance";
     }

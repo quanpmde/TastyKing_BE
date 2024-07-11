@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -79,7 +80,7 @@ public class UserService {
         user.setPhone(request.getPhone());
 
         if (request.getStatus().equalsIgnoreCase("Active")) {
-            user.setActive(true);
+            user.setActive(1);
             try {
                 emailUtil.sendActiveAccount(request.getEmail(), request.getPassword());
             } catch (MessagingException e) {
@@ -90,7 +91,8 @@ public class UserService {
             userRepository.save(user);
             return "New account has been created and activated.";
         } else {
-            user.setActive(false);
+            user.setActive(0);
+            user.setRole(Role.USER.name());
             userRepository.save(user);
             return "Account has been created. Please verify email to activate.";
         }
@@ -115,7 +117,7 @@ public class UserService {
     User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
         if (user.getOtp().equals(otp) &&
                 Duration.between(user.getGenerateOtpTime(), LocalDateTime.now()).getSeconds() < 60) {
-            user.setActive(true);
+            user.setActive(1);
             userRepository.save(user);
             RewardPoint rewardPoint = new RewardPoint();
             rewardPoint.setUser(user);
@@ -130,7 +132,7 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
         if (user.getOtp().equals(otp) &&
                 Duration.between(user.getGenerateOtpTime(), LocalDateTime.now()).getSeconds() < 60) {
-            user.setActive(true);
+            user.setActive(1);
             userRepository.save(user);
             return true;
         }
@@ -200,12 +202,38 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
         if (user.getOtp().equals(otp) &&
                 Duration.between(user.getGenerateOtpTime(), LocalDateTime.now()).getSeconds() < 60) {
-            user.setActive(true);
+            user.setActive(1);
             userRepository.save(user);
 
             return true;
         }
         return false;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getAllCustomer(){
+        String roles = Role.USER.name();
+        List<User> users = userRepository.findByRole(roles);
+        return users.stream().map(userMapper::toUserResponse).toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse getUserByUserID(int userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXIST));
+        return userMapper.toUserResponse(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+   public UserResponse blockAccount(int userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXIST));
+        if(user.getActive()==1){
+            user.setActive(0);
+            User blockUser = userRepository.save(user);
+            return userMapper.toUserResponse(blockUser);
+        }
+        user.setActive(1);
+        User unblockUser = userRepository.save(user);
+        return userMapper.toUserResponse(unblockUser);
     }
 
 }

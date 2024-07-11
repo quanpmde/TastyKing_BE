@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class VoucherRequest {
-    private String voucherId;
+    private String voucherCode;
     private String voucherTitle;
     private int voucherDiscount;
     private int voucherQuantity;

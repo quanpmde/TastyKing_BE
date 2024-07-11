@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class VoucherResponse {
-    private String voucherId;
+    private int voucherId;
+    private String voucherCode;
     private String voucherTitle;
     private int voucherDiscount;
     private int voucherQuantity;
@@ -26,6 +27,6 @@ public class VoucherResponse {
     private LocalDateTime voucherDueDate;
     private String voucherImage;
     private String voucherDescribe;
-    private boolean isExpired;
+    private int expried;
 }
 

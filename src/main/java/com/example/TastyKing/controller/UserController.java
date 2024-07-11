@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -102,5 +105,26 @@ public class UserController {
         } else {
             throw new AppException(ErrorCode.OTP_INVALID);  // This should return a 400 or appropriate error status
         }
+    }
+
+    @GetMapping("/getCustomer")
+    public ApiResponse<List<UserResponse>> getAllCustomer(){
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllCustomer())
+                .build();
+    }
+
+    @GetMapping("getUserByID/{userId}")
+    public ApiResponse<UserResponse> getUserByID(@PathVariable("userId") int userId){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserByUserID(userId))
+                .build();
+    }
+
+    @PutMapping("/account-controll/{userId}")
+    public ApiResponse<UserResponse> accountControll(@PathVariable("userId") int userId){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.blockAccount(userId))
+                .build();
     }
 }

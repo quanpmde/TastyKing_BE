@@ -45,7 +45,7 @@ String email;
  String role;
 
  @Column(name = "active")
- boolean active;
+ int active;
 
  @Column(name = "otp", length = 10)
  String otp;

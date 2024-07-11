@@ -73,7 +73,7 @@ public class VoucherExchangeService {
         rewardPointRepository.save(rewardPoint);
 
 
-        voucher.setNumberVoucherUsed(voucher.getVoucherQuantity() - 1);
+        voucher.setVoucherQuantity(voucher.getVoucherQuantity()-1);
         voucherRepository.save(voucher);
 
 

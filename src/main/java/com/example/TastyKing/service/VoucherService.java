@@ -46,20 +46,17 @@ public class VoucherService {
     @PreAuthorize("hasRole('ADMIN')")
     public VoucherResponse createVoucher(VoucherRequest request) throws IOException {
         String relativeImagePath = saveImage(request.getVoucherImage());
-
-        if (voucherRepository.existsById(request.getVoucherId())){
-            throw new AppException(ErrorCode.VOUCHER_HAS_EXISTED);
-        }
         Voucher voucher = voucherMapper.toVoucher(request);
+        voucher.setVoucherExchangePoint(request.getVoucherExchangePoint());
         voucher.setNumberVoucherUsed(0);
         voucher.setVoucherImage(relativeImagePath);
-        voucher.setExpired(false);
+        voucher.setExpried(0);
         Voucher newVoucher = voucherRepository.save(voucher);
         return voucherMapper.toVoucherResponse(newVoucher);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteVoucher(String voucherID){
+    public String deleteVoucher(int voucherID){
         voucherRepository.deleteById(voucherID);
         return "Voucher deleted successfull";
     }
@@ -71,27 +68,43 @@ public class VoucherService {
                 .collect(Collectors.toList());
     }
 
-    public VoucherResponse getVoucherByVoucherID(String voucherID){
+    public VoucherResponse getVoucherByVoucherID(int voucherID){
         Voucher voucher = voucherRepository.findById(voucherID).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
         return voucherMapper.toVoucherResponse(voucher);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public VoucherResponse updateVoucher(String voucherID, UpdateVoucherRequest request ) throws IOException {
-        String relativeImagePath = saveImage(request.getVoucherImage());
-        Voucher voucher = voucherRepository.findById(voucherID).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
-        voucher.setVoucherTitle(request.getVoucherTitle());
-        voucher.setVoucherDiscount(request.getVoucherDiscount());
-        voucher.setVoucherQuantity(request.getVoucherQuantity());
-        voucher.setVoucherExchangePoint(request.getVoucherExchangePoint());
-        voucher.setVoucherStartDate(request.getVoucherStartDate());
-        voucher.setVoucherDueDate(request.getVoucherDueDate());
-        voucher.setVoucherImage(relativeImagePath);
+    public VoucherResponse updateVoucher(int voucherID, UpdateVoucherRequest request) throws IOException {
+        Voucher voucher = voucherRepository.findById(voucherID)
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
+
+        voucher.setVoucherTitle(request.getUpdateVoucherTitle());
+        voucher.setVoucherDiscount(request.getUpdateDiscount());
+        voucher.setVoucherQuantity(request.getUpdateQuantity());
+        voucher.setVoucherExchangePoint(request.getUpdateExchangePoint());
+
+        // Ensure dates are set correctly
+        if (request.getUpdateOpenDate() != null) {
+            voucher.setVoucherStartDate(request.getUpdateOpenDate());
+        }
+        if (request.getUpdateEndDate() != null) {
+            voucher.setVoucherDueDate(request.getUpdateEndDate());
+        }
+        if(request.getUpdateExchangePoint()!=null){
+            voucher.setVoucherExchangePoint(request.getUpdateExchangePoint());
+        }
+
+        // Handle image update only if a new image is provided
+        if (request.getUpdateVoucherImage() != null && !request.getUpdateVoucherImage().isEmpty()) {
+            String relativeImagePath = saveImage(request.getUpdateVoucherImage());
+            voucher.setVoucherImage(relativeImagePath);
+        }
 
         Voucher voucherUpdate = voucherRepository.save(voucher);
 
         return voucherMapper.toVoucherResponse(voucherUpdate);
     }
+
 
 
 
@@ -114,19 +127,22 @@ public class VoucherService {
         List<Voucher> vouchers = voucherRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         for (Voucher voucher : vouchers) {
-            if ((voucher.getVoucherDueDate().isBefore(now) || voucher.getNumberVoucherUsed() > voucher.getVoucherQuantity()) && !voucher.isExpired()) {
-                voucher.setExpired(true);
+            if ((voucher.getVoucherDueDate().isBefore(now) || voucher.getNumberVoucherUsed() > voucher.getVoucherQuantity()) && voucher.getExpried()==1) {
+                voucher.setExpried(1);
+                voucherRepository.save(voucher);
+            } else {
+                voucher.setExpried(0);
                 voucherRepository.save(voucher);
             }
         }
     }
 
 
-    public VoucherResponse applyVoucher(String voucherId, String userEmail) {
+    public VoucherResponse applyVoucher(String voucherCode, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
 
-        Voucher voucher = voucherRepository.findByVoucherId(voucherId)
+        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode)
                 .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
 
         Optional<VoucherExchange> optionalVoucherExchange = voucherExchangeRepository
@@ -150,6 +166,8 @@ public class VoucherService {
 
         return voucherMapper.toVoucherResponse(voucher);
     }
+
+
 
 
 }

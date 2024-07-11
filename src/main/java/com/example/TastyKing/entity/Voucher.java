@@ -18,8 +18,12 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "voucherExchanges"})
 public class Voucher {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "VoucherId", length = 50, unique = true)
-    private String voucherId;
+    private int voucherId;
+
+    @Column(name = "VoucherCode", nullable = false, length = 100)
+    private String voucherCode;
 
     @Column(name = "VoucherTitle", nullable = false, length = 100)
     private String voucherTitle;
@@ -33,7 +37,7 @@ public class Voucher {
     @Column(name = "VoucherUsed", nullable = false)
     private int numberVoucherUsed;
 
-    @Column(name = "VoucherExchangeValue", nullable = false)
+    @Column(name = "VoucherExchangePoint", nullable = false)
     private Double voucherExchangePoint;
 
     @Column(name = "VoucherStartDate", nullable = false)
@@ -48,8 +52,8 @@ public class Voucher {
     @Column(name = "VoucherDescribe", columnDefinition = "TEXT")
     private String voucherDescribe;
 
-    @Column(name = "IsExpired")
-    private boolean isExpired;
+    @Column(name = "Expried")
+    private int expried;
 
     
 }

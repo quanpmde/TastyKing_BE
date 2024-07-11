@@ -37,30 +37,30 @@ public class VoucherController {
     }
 
     @DeleteMapping("/{voucherID}")
-    public ApiResponse<String> deleteVoucher(@PathVariable("voucherID") String voucherID){
+    public ApiResponse<String> deleteVoucher(@PathVariable("voucherID") int voucherID){
         return ApiResponse.<String>builder()
                 .result(voucherService.deleteVoucher(voucherID))
                 .build();
     }
 
-    @PutMapping("/{voucherID}")
-    public ApiResponse<VoucherResponse> updateVoucher(@PathVariable("voucherID") String voucherID, @ModelAttribute @Valid UpdateVoucherRequest request) throws IOException {
+    @PutMapping("/{voucherId}")
+    public ApiResponse<VoucherResponse> updateVoucher(@PathVariable("voucherId") int voucherId, @ModelAttribute @Valid UpdateVoucherRequest request) throws IOException {
         return ApiResponse.<VoucherResponse>builder()
-                .result(voucherService.updateVoucher(voucherID, request))
+                .result(voucherService.updateVoucher(voucherId, request))
                 .build();
     }
 
-    @GetMapping("/{voucherID}")
-    public ApiResponse<VoucherResponse> getVoucherByVoucherID(@PathVariable("voucherID") String voucherID){
+    @GetMapping("/{voucherId}")
+    public ApiResponse<VoucherResponse> getVoucherByVoucherID(@PathVariable("voucherId") int voucherId){
         return ApiResponse.<VoucherResponse>builder()
-                .result(voucherService.getVoucherByVoucherID(voucherID))
+                .result(voucherService.getVoucherByVoucherID(voucherId))
                 .build();
     }
 
-    @GetMapping("/apply/{voucherID}")
-    public ApiResponse<VoucherResponse> applyVoucher(@PathVariable("voucherID") String voucherID, @RequestParam String email){
+    @GetMapping("/apply/{voucherCode}")
+    public ApiResponse<VoucherResponse> applyVoucher(@PathVariable("voucherCode") String voucherCode, @RequestParam String email){
         return ApiResponse.<VoucherResponse>builder()
-                .result(voucherService.applyVoucher(voucherID, email))
+                .result(voucherService.applyVoucher(voucherCode, email))
                 .build();
     }
 }
