@@ -33,7 +33,7 @@ public class AuthenticationService {
                 () -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)
 
         );
-        if(!user.isActive()){
+        if(user.getActive()==0){
             throw new AppException(ErrorCode.EMAIL_NOT_EXISTED);
         }
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
@@ -45,8 +45,20 @@ public class AuthenticationService {
                 .authenticated(true).build();
 
     }
+    public User saveOAuth2User(String email, String name) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .email(email)
+                    .fullName(name)
+                    .userName(email)
+                    .active(1)
+                    .role("USER")
+                    .build();
+            return userRepository.save(newUser);
+        });
+    }
 
-    private String generateToken(User user) {
+    public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())

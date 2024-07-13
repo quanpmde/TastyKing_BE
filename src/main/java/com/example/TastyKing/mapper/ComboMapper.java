@@ -16,6 +16,7 @@ import com.example.TastyKing.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,14 +28,13 @@ public class ComboMapper {
     public Combo toCombo(ComboRequest request) {
         Combo combo = new Combo();
         combo.setComboTitle(request.getComboTitle());
-        combo.setOldPrice(request.getOldPrice());
+
         combo.setNewPrice(request.getNewPrice());
         combo.setOpenDate(request.getOpenDate());
         combo.setEndDate(request.getEndDate());
         combo.setComboDescription(request.getComboDescription());
         combo.setComboImage(request.getComboImage());
-        combo.setComboImage2(request.getComboImage2());
-        combo.setComboImage3(request.getComboImage3());
+
 
         combo.setComboFoods(
                 request.getComboFoods().stream()
@@ -48,14 +48,13 @@ public class ComboMapper {
         ComboResponse comboResponse = new ComboResponse();
         comboResponse.setComboID(combo.getComboID());
         comboResponse.setComboTitle(combo.getComboTitle());
-        comboResponse.setOldPrice(combo.getOldPrice());
+
         comboResponse.setNewPrice(combo.getNewPrice());
         comboResponse.setOpenDate(combo.getOpenDate());
         comboResponse.setEndDate(combo.getEndDate());
         comboResponse.setComboDescription(combo.getComboDescription());
         comboResponse.setComboImage(combo.getComboImage());
-        comboResponse.setComboImage2(combo.getComboImage2());
-        comboResponse.setComboImage3(comboResponse.getComboImage3());
+
 
         comboResponse.setComboFoods(
                 combo.getComboFoods().stream()
@@ -79,6 +78,7 @@ public class ComboMapper {
         ComboFoodResponse comboFoodResponse = new ComboFoodResponse();
         comboFoodResponse.setFoodID(comboFood.getFood().getFoodID());
         comboFoodResponse.setFoodName(comboFood.getFood().getFoodName());
+        comboFoodResponse.setFoodImage(comboFood.getFood().getFoodImage());
         comboFoodResponse.setQuantity(comboFood.getQuantity());
         return comboFoodResponse;
     }
@@ -86,7 +86,6 @@ public class ComboMapper {
 
     public void updateComboFromRequest(Combo combo, UpdateComboRequest request) {
         combo.setComboTitle(request.getComboTitle());
-        combo.setOldPrice(request.getOldPrice());
         combo.setNewPrice(request.getNewPrice());
         combo.setOpenDate(request.getOpenDate());
         combo.setEndDate(request.getEndDate());
@@ -94,13 +93,32 @@ public class ComboMapper {
         combo.setComboImage(request.getComboImage());
 
         if (request.getComboFoods() != null) {
-            combo.setComboFoods(
-                    request.getComboFoods().stream()
-                            .map(foodRequest -> toComboFood(foodRequest, combo))
-                            .collect(Collectors.toSet())
+            // Fetch existing ComboFoods
+            Set<ComboFood> existingComboFoods = combo.getComboFoods();
+
+            // Create new ComboFoods from request
+            Set<ComboFood> newComboFoods = request.getComboFoods().stream()
+                    .map(foodRequest -> toComboFood(foodRequest, combo))
+                    .collect(Collectors.toSet());
+
+            // Remove ComboFoods that are no longer in the request
+            existingComboFoods.removeIf(existingComboFood ->
+                    newComboFoods.stream().noneMatch(newComboFood -> newComboFood.getId().equals(existingComboFood.getId()))
             );
+
+            // Add or update the ComboFoods from the request
+            for (ComboFood newComboFood : newComboFoods) {
+                existingComboFoods.stream()
+                        .filter(existingComboFood -> existingComboFood.getId().equals(newComboFood.getId()))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                existingComboFood -> existingComboFood.setQuantity(newComboFood.getQuantity()),
+                                () -> existingComboFoods.add(newComboFood)
+                        );
+            }
         }
     }
+
 
     public FoodResponse toFoodResponse(Food food, int quantity) {
         return FoodResponse.builder()
@@ -112,8 +130,6 @@ public class ComboMapper {
                 .description(food.getDescription())
                 .unit(food.getUnit())
                 .foodImage(food.getFoodImage())
-                .foodImage2(food.getFoodImage2())
-                .foodImage3(food.getFoodImage3())
                 .build();
     }
 

@@ -24,9 +24,6 @@ public class Combo {
     private String comboTitle;
 
     @Column(nullable = false)
-    private Double oldPrice;
-
-    @Column(nullable = false)
     private Double newPrice;
 
     @Column(nullable = false)

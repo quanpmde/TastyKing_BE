@@ -14,7 +14,7 @@ public class ComboFood {
     @EmbeddedId
     private ComboFoodId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("comboID")
     @JoinColumn(name = "comboID")
     private Combo combo;

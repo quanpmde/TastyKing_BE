@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -24,7 +25,7 @@ public class ComboController {
     private ComboService comboService;
 
     @PostMapping
-    public ApiResponse<ComboResponse> createNewCombo(@RequestBody @Valid ComboRequest request) {
+    public ApiResponse<ComboResponse> createNewCombo(@RequestBody @Valid ComboRequest request) throws IOException {
         return ApiResponse.<ComboResponse>builder()
                 .result(comboService.createNewCombo(request))
                 .build();

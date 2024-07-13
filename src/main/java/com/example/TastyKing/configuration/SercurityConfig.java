@@ -26,7 +26,7 @@ public class SercurityConfig {
     private final String[] PUBLIC_ENDPOINTS ={"/users/register","/users/verify-account", "/users/sendOTP", "/users/verify-email",
             "/users/regenerate-otp","/auth/login", "/food",
             "/food/{categoryID}", "/food/getFood/{foodID}",
-            "/combo", "/combo/getCombo/{comboID}", "/table-position", "/table/{tablePositionID}", "/table/getTable/{tableID}",
+            "/combo", "/combo/getCombo/{comboID}", "/table-position", "/table" ,"/table/{tablePositionID}", "/table/getTable/{tableID}",
             "/voucher", "/voucher/{voucherID}", "/order"
     };
 
@@ -42,10 +42,16 @@ public class SercurityConfig {
                         .requestMatchers(HttpMethod.GET, "/category").permitAll()
                         .requestMatchers(HttpMethod.GET, "/combo").permitAll()
                         .requestMatchers(HttpMethod.GET, "/food/getReview/{foodID}").permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "oauth2/redirect").permitAll()
                         .anyRequest()
                         .authenticated()
+        )
+                .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
+                        httpSecurityOAuth2LoginConfigurer.defaultSuccessUrl("/oauth2/redirect", true)
                 );
+
+
+
 
         httpSecurity.oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer -> {
                     httpSecurityOAuth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
@@ -66,6 +72,7 @@ public class SercurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
+
     @Bean
     JwtDecoder jwtDecoder(){
         SecretKeySpec secretKeySpec = new SecretKeySpec(signature.getBytes(),"HS512");

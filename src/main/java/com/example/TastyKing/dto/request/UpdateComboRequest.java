@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UpdateComboRequest {
     private String comboTitle;
-    private Double oldPrice;
     private Double newPrice;
 
     @OpenDateConstraint(message = "OPEN_DATE_INVALID")
@@ -27,7 +26,5 @@ public class UpdateComboRequest {
     private LocalDateTime endDate;
     private String comboDescription;
     private String comboImage;
-    private String comboImage2;
-    private String comboImage3;
     private List<ComboFoodRequest> comboFoods;
 }

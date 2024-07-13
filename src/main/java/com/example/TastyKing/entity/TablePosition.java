@@ -13,7 +13,6 @@ import lombok.*;
 public class TablePosition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     Long tablePositionID;
     @Column(nullable = false)
     private int tableQuantity;

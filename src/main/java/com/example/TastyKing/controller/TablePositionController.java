@@ -49,4 +49,10 @@ public class TablePositionController {
                 .result(tablePositionService.deletePosition(tablePositionID))
                 .build();
     }
+    @GetMapping("/{tablePositionID}")
+    public ApiResponse<TablePositionResponse> getTablePositionByID(@PathVariable("tablePositionID") Long tablePositionID){
+        return ApiResponse.<TablePositionResponse>builder()
+                .result(tablePositionService.getByID(tablePositionID))
+                .build();
+    }
 }

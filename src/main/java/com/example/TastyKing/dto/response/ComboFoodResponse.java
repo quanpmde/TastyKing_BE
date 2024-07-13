@@ -12,5 +12,6 @@ import lombok.RequiredArgsConstructor;
 public class ComboFoodResponse {
     private Long foodID;
     private String foodName;
+    private String foodImage;
     private Integer quantity;
 }

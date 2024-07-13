@@ -16,13 +16,11 @@ import java.util.List;
 public class ComboResponse {
     private Long comboID;
     private String comboTitle;
-    private Double oldPrice;
     private Double newPrice;
     private LocalDateTime openDate;
     private LocalDateTime endDate;
     private String comboDescription;
     private String comboImage;
-    private String comboImage2;
-    private String comboImage3;
+
     private List<ComboFoodResponse> comboFoods;
 }

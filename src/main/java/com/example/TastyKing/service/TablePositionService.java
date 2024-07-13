@@ -4,6 +4,7 @@ import com.example.TastyKing.dto.request.TablePositionRequest;
 import com.example.TastyKing.dto.request.UpdateTablePosition;
 import com.example.TastyKing.dto.response.TablePositionResponse;
 import com.example.TastyKing.entity.TablePosition;
+import com.example.TastyKing.entity.Tables;
 import com.example.TastyKing.exception.AppException;
 import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.mapper.TablePositionMapper;
@@ -56,4 +57,10 @@ public class TablePositionService {
         tablePositionRepository.deleteById(tablePositionID);
         return "Deleted successfull";
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    public TablePositionResponse getByID(Long tablePositionID){
+        TablePosition tablePosition = tablePositionRepository.findById(tablePositionID).orElseThrow(() -> new AppException(ErrorCode.POSITION_NOT_EXIST));
+        return tablePositionMapper.toTablePositionResponse(tablePosition);
+    }
+
 }
