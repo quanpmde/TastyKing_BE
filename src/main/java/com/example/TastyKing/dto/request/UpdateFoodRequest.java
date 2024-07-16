@@ -2,6 +2,7 @@ package com.example.TastyKing.dto.request;
 
 import com.example.TastyKing.entity.Category;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,15 +22,12 @@ public class UpdateFoodRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "PRICE_INVALID")
     private Double foodPrice;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "PRICE_INVALID")
-    private Double foodCost;
-
 
     private String description;
 
     private String unit;
 
-
+    @Null
     private MultipartFile foodImage;
 
 }

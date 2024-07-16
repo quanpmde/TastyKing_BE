@@ -2,6 +2,7 @@ package com.example.TastyKing.service;
 
 import com.example.TastyKing.dto.request.ComboRequest;
 import com.example.TastyKing.dto.request.UpdateComboRequest;
+import com.example.TastyKing.dto.response.ComboFoodResponse;
 import com.example.TastyKing.dto.response.ComboResponse;
 import com.example.TastyKing.dto.response.FoodResponse;
 import com.example.TastyKing.entity.Combo;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,6 +91,13 @@ public class ComboService {
                 .collect(Collectors.toList());
     }
 
+    public List<ComboFoodResponse> getComboFoodByComboID(Long comboID) {
+        Combo existingCombo = comboRepository.findById(comboID)
+                .orElseThrow(() -> new AppException(ErrorCode.COMBO_NOT_EXIST));
+        return existingCombo.getComboFoods().stream()
+                .map(comboMapper::toComboFoodResponse)
+                .collect(Collectors.toList());
+    }
 
 
 }

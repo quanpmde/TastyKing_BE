@@ -349,6 +349,29 @@
     
             return "The customer has successfully received the table.";
         }
+        @Transactional(rollbackFor = Exception.class)
+        @PreAuthorize("hasRole('ADMIN')")
+        public String doneDeal(Long orderID) {
+
+            // Fetch the existing order
+            Order order = orderRepository.findById(orderID)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+
+            // Check if booking date is greater than current time
+
+
+            // Update the order status to "Confirmed"
+            order.setOrderStatus(OrderStatus.Done.name());
+
+            Tables table = order.getTable();
+            table.setTableStatus("Available");
+            tableRepository.save(table);
+
+            // Save the updated order
+            Order updatedOrder = orderRepository.save(order);
+
+            return "The order has been completed";
+        }
     
     
         @Transactional(rollbackFor = Exception.class)

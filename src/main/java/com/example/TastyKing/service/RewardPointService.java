@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class RewardPointService {
@@ -29,4 +32,17 @@ public class RewardPointService {
                 .balance(rewardPoint.getBalance())
                 .build();
     }
+
+
+    public List<RewardPointResponse> rewardPointRank() {
+        return rewardPointRepository.findTop5ByOrderByBalanceDesc()
+                .stream()
+                .map(rp -> RewardPointResponse.builder()
+                        .rewardID(rp.getRewardID())
+                        .user(rp.getUser())
+                        .balance(rp.getBalance())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 }

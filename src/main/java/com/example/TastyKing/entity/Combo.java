@@ -32,13 +32,13 @@ public class Combo {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
-    @Column(length = 5000)
+    @Column(length = 2000)
     private String comboImage;
 
-    @Column(length = 5000)
+    @Column(length = 2000)
     private String comboImage2;
 
-    @Column(length = 5000)
+    @Column(length = 2000)
     private String comboImage3;
 
     @Column(length = 5000)

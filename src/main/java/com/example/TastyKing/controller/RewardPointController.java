@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/point")
 @RequiredArgsConstructor
@@ -20,5 +22,9 @@ public class RewardPointController {
         return ApiResponse.<RewardPointResponse>builder()
                 .result(rewardPointService.getBalance(email))
                 .build();
+    }
+    @GetMapping("/top5")
+    public List<RewardPointResponse> getTop5RewardPoints() {
+        return rewardPointService.rewardPointRank();
     }
 }

@@ -78,21 +78,14 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(voucherID)
                 .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
 
+        // Update fields based on the request
+        voucher.setVoucherStartDate(request.getUpdateOpenDate());
+        voucher.setVoucherDueDate(request.getUpdateEndDate());
         voucher.setVoucherTitle(request.getUpdateVoucherTitle());
         voucher.setVoucherDiscount(request.getUpdateDiscount());
         voucher.setVoucherQuantity(request.getUpdateQuantity());
         voucher.setVoucherExchangePoint(request.getUpdateExchangePoint());
-
-        // Ensure dates are set correctly
-        if (request.getUpdateOpenDate() != null) {
-            voucher.setVoucherStartDate(request.getUpdateOpenDate());
-        }
-        if (request.getUpdateEndDate() != null) {
-            voucher.setVoucherDueDate(request.getUpdateEndDate());
-        }
-        if(request.getUpdateExchangePoint()!=null){
-            voucher.setVoucherExchangePoint(request.getUpdateExchangePoint());
-        }
+        voucher.setVoucherDescribe(request.getUpdateDescription());
 
         // Handle image update only if a new image is provided
         if (request.getUpdateVoucherImage() != null && !request.getUpdateVoucherImage().isEmpty()) {
@@ -100,10 +93,12 @@ public class VoucherService {
             voucher.setVoucherImage(relativeImagePath);
         }
 
+        // Save the updated voucher entity
         Voucher voucherUpdate = voucherRepository.save(voucher);
 
         return voucherMapper.toVoucherResponse(voucherUpdate);
     }
+
 
 
 

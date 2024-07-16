@@ -71,5 +71,11 @@ public class TableController {
                 .result(tableService.getTableHasStatusAvailable())
                 .build();
           }
+
+    @PutMapping("update/{tableID}")
+    public ApiResponse<TableResponse> updateTable(@PathVariable("tableID") Long tableID, @RequestBody UpdateTableRequest request) {
+        TableResponse response = tableService.updateTable(tableID, request);
+        return ApiResponse.<TableResponse>builder().result(response).build();
+    }
 }
 

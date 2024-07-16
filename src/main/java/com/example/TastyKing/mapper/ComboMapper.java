@@ -74,10 +74,11 @@ public class ComboMapper {
                 .quantity(request.getQuantity())
                 .build();
     }
-    private ComboFoodResponse toComboFoodResponse(ComboFood comboFood) {
+    public ComboFoodResponse toComboFoodResponse(ComboFood comboFood) {
         ComboFoodResponse comboFoodResponse = new ComboFoodResponse();
         comboFoodResponse.setFoodID(comboFood.getFood().getFoodID());
         comboFoodResponse.setFoodName(comboFood.getFood().getFoodName());
+        comboFoodResponse.setFoodPrice(comboFood.getFood().getFoodPrice());
         comboFoodResponse.setFoodImage(comboFood.getFood().getFoodImage());
         comboFoodResponse.setQuantity(comboFood.getQuantity());
         return comboFoodResponse;
@@ -126,7 +127,7 @@ public class ComboMapper {
                 .category(food.getCategory())
                 .foodName(food.getFoodName())
                 .foodPrice(food.getFoodPrice())
-                .foodCost(food.getFoodCost())
+
                 .description(food.getDescription())
                 .unit(food.getUnit())
                 .foodImage(food.getFoodImage())

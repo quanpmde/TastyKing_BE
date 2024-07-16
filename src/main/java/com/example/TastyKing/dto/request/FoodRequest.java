@@ -22,8 +22,6 @@ public class FoodRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "PRICE_INVALID")
     private Double foodPrice;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "PRICE_INVALID")
-    private Double foodCost;
 
 
     private String description;

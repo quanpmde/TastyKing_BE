@@ -20,9 +20,9 @@ public class UpdateVoucherRequest {
     private int updateDiscount;
     private int updateQuantity;
     private Double updateExchangePoint;
-    @OpenDateConstraint(message = "OPEN_DATE_INVALID")
+
     private LocalDateTime updateOpenDate;
     private LocalDateTime updateEndDate;
     private MultipartFile updateVoucherImage;
-    private String updateDescription;
+            private String updateDescription;
 }

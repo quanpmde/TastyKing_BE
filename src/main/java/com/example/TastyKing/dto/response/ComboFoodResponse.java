@@ -13,5 +13,6 @@ public class ComboFoodResponse {
     private Long foodID;
     private String foodName;
     private String foodImage;
+    private Double foodPrice;
     private Integer quantity;
 }
