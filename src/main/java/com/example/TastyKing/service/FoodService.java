@@ -88,20 +88,31 @@ public class FoodService {
 
     @PreAuthorize("hasRole('ADMIN')")
         public FoodResponse updateFood(Long foodID, UpdateFoodRequest request) throws IOException{
-        String relativeImagePath = saveImage(request.getFoodImage());
+
+
             Food food = foodRepository.findById(foodID).orElseThrow(() ->
                     new AppException(ErrorCode.FOOD_NOT_EXIST));
             Category category = categoryRepository.findById(request.getCategoryID())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXIST));
+            if(request.getFoodImage()!= null && !request.getFoodImage().isEmpty()){
             food.setCategory(category);
             food.setFoodName(request.getFoodName());
-            food.setFoodCost(request.getFoodCost());
+        String relativeImagePath = saveImage(request.getFoodImage());
             food.setFoodImage(relativeImagePath);
             food.setDescription(request.getDescription());
             food.setFoodPrice(request.getFoodPrice());
             food.setUnit(request.getUnit());
            Food updateFood= foodRepository.save(food);
            return foodMapper.toFoodResponse(updateFood);
+            }
+        food.setCategory(category);
+        food.setFoodName(request.getFoodName());
+        food.setDescription(request.getDescription());
+        food.setFoodPrice(request.getFoodPrice());
+        food.setUnit(request.getUnit());
+        Food updateFood= foodRepository.save(food);
+        return foodMapper.toFoodResponse(updateFood);
+
         }
         public FoodResponse getFoodByFoodID(Long foodID){
            Food food = foodRepository.findById(foodID).orElseThrow(() ->

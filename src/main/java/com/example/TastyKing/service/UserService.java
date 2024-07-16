@@ -121,7 +121,7 @@ public class UserService {
             userRepository.save(user);
             RewardPoint rewardPoint = new RewardPoint();
             rewardPoint.setUser(user);
-            rewardPoint.setBalance(0.0);
+            rewardPoint.setBalance(10.0);
             rewardPointRepository.save(rewardPoint);
             return true;
         }

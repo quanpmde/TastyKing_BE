@@ -28,6 +28,8 @@ public class Order {
     @JoinColumn(name = "tableID", nullable = false)
     private Tables table;
 
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
 
     @Column(name = "orderStatus", length = 50)
     private String orderStatus;

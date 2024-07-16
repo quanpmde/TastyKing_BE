@@ -27,9 +27,6 @@ public class Food {
     @Column(nullable = false)
     private Double foodPrice;
 
-    @Column(nullable = false)
-    private Double foodCost;
-
     @Column(length = 10000)
     private String description;
 

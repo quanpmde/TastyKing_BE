@@ -50,17 +50,24 @@ public class TableService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public TableResponse updateTable(Long tableID,UpdateTableRequest request){
-        Tables tables =tableRepository.findById(tableID).orElseThrow(() ->
+    public TableResponse updateTable(Long tableID, UpdateTableRequest request) {
+        Tables tables = tableRepository.findById(tableID).orElseThrow(() ->
                 new AppException(ErrorCode.TABLE_NOT_EXIST));
-        TablePosition tablePosition = tablePositionRepository.findById(request.getTablePosition().getTablePositionID())
-                .orElseThrow(() -> new AppException(ErrorCode.POSITION_NOT_EXIST));
-        tables.setTablePosition(tablePosition);
+
+        // Check if request.getTablePosition() is not null before accessing its properties
+        if (request.getTablePosition() != null) {
+            TablePosition tablePosition = tablePositionRepository.findById(request.getTablePosition().getTablePositionID())
+                    .orElseThrow(() -> new AppException(ErrorCode.POSITION_NOT_EXIST));
+            tables.setTablePosition(tablePosition);
+        }
+
         tables.setTableName(request.getTableName());
         tables.setNumOfchair(request.getNumOfchair());
+
         Tables updateTable = tableRepository.save(tables);
         return tableMapper.toTableResponse(updateTable);
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     public TableResponse updateTableStatus(Long tableID, UpdateTableStatusRequest request) {
@@ -73,8 +80,12 @@ public class TableService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteTable(Long tableID) {
-        tableRepository.deleteById(tableID);
-        return "Delete table successfull";
+       Tables table =tableRepository.findById(tableID).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+       if (table.getTableStatus().equalsIgnoreCase("Available")){
+           tableRepository.deleteById(tableID);
+           return "Delete table successfull";
+       }
+        return "Can't delete";
 
     }
     public List<TableResponse> getTableByPosition(Long tablePositionID) {

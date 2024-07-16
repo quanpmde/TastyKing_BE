@@ -20,7 +20,7 @@ public class Combo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long comboID;
 
-    @Column(length = 2000)
+    @Column(length = 1000)
     private String comboTitle;
 
     @Column(nullable = false)
@@ -32,16 +32,16 @@ public class Combo {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
-    @Column(length = 5000)
+    @Column(length = 1000)
     private String comboImage;
 
-    @Column(length = 5000)
+    @Column(length = 1000)
     private String comboImage2;
 
-    @Column(length = 5000)
+    @Column(length = 1000)
     private String comboImage3;
 
-    @Column(length = 5000)
+    @Column(length = 1000)
     private String comboDescription;
 
     @Lob

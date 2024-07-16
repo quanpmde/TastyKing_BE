@@ -95,4 +95,10 @@ public class OrderController {
                 .result(orderService.receiveTable(orderID))
                 .build();
     }
+    @PutMapping("/doneOrder/{orderID}")
+    public ApiResponse<String> doneOrder(@PathVariable("orderID") Long orderID){
+        return ApiResponse.<String>builder()
+                .result(orderService.doneDeal(orderID))
+                .build();
+    }
 }

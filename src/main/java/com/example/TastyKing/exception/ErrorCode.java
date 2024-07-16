@@ -39,7 +39,11 @@ public enum ErrorCode {
     USER_HAS_NOT_EXCHANGED_VOUCHER(1031,"User has not exchanged this voucher.", HttpStatus.BAD_REQUEST),
     INVALID_BOOKING_TIME(1032, "Can not receive table. Please wait", HttpStatus.BAD_REQUEST),
     RATING_INVALID(1033, "Rating must be greater than 1", HttpStatus.BAD_REQUEST),
-    USER_NO_EXIST(1034, "User does not exist",HttpStatus.BAD_REQUEST ), OUT_OF_TABLE(1035, "Number of table is out of stock", HttpStatus.BAD_REQUEST);
+    USER_NO_EXIST(1034, "User does not exist",HttpStatus.BAD_REQUEST ),
+    OUT_OF_TABLE(1035, "Number of table is out of stock", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_EXISTED(1036,"Payment has not exist",HttpStatus.BAD_REQUEST),
+    ORDERID_MUST_BE_PROVIDED(1037,"Order ID must be provided",HttpStatus.BAD_REQUEST),
+    ONLY_PAY_OR_NOT_PAY_YET_IS_ALLOWED(1038,"Invalid status. Only 'paid' or 'not pay yet' is allowed.",HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

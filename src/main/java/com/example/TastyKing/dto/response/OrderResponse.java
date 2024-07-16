@@ -1,9 +1,6 @@
 package com.example.TastyKing.dto.response;
 
-import com.example.TastyKing.entity.OrderDetail;
-import com.example.TastyKing.entity.Tables;
-import com.example.TastyKing.entity.User;
-import com.example.TastyKing.entity.Voucher;
+import com.example.TastyKing.entity.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
