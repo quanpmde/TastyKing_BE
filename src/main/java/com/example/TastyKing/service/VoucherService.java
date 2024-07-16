@@ -127,15 +127,20 @@ public class VoucherService {
         List<Voucher> vouchers = voucherRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         for (Voucher voucher : vouchers) {
-            if ((voucher.getVoucherDueDate().isBefore(now) || voucher.getNumberVoucherUsed() > voucher.getVoucherQuantity()) && voucher.getExpried()==1) {
-                voucher.setExpried(1);
-                voucherRepository.save(voucher);
+            if (voucher.getVoucherDueDate().isBefore(now) || voucher.getNumberVoucherUsed() >= voucher.getVoucherQuantity()) {
+                if (voucher.getExpried() != 1) {
+                    voucher.setExpried(1);
+                    voucherRepository.save(voucher);
+                }
             } else {
-                voucher.setExpried(0);
-                voucherRepository.save(voucher);
+                if (voucher.getExpried() != 0) {
+                    voucher.setExpried(0);
+                    voucherRepository.save(voucher);
+                }
             }
         }
     }
+
 
 
     public VoucherResponse applyVoucher(String voucherCode, String userEmail) {

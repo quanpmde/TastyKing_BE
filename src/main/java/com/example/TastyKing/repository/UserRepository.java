@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUserName(String username);
 
     List<User> findByRole(String roles);
+    long countByRole(String role);
+
 }

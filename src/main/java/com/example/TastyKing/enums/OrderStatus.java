@@ -4,7 +4,9 @@ public enum OrderStatus {
     Canceled,
     Processing,
     Confirmed,
+    InProgressNotPaying,
     InProgress,
     Done,
+    Updating
 
 }

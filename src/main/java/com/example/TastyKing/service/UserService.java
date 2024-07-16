@@ -236,4 +236,52 @@ public class UserService {
         return userMapper.toUserResponse(unblockUser);
     }
 
+    public long countAllUsersWithUserRole() {
+        return userRepository.countByRole("USER");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createNewStaffByAdmin(CreateNewStaffRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        User user = new User();
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUserName(request.getEmail());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setActive(1);
+        user.setGenerateOtpTime(LocalDateTime.now());
+        user.setRole(Role.STAFF.name());
+        userRepository.save(user);
+        return "New account has been created and activated.";
+
+
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getAllStaff(){
+        String roles = Role.STAFF.name();
+        List<User> users = userRepository.findByRole(roles);
+        return users.stream().map(userMapper::toUserResponse).toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+   public String deleteUerByID(int userId){
+        userRepository.deleteById(userId);
+        return "Delete user success";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse updateStaff(int userId, UpdateStaffRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXIST));
+
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        User save = userRepository.save(user);
+        return userMapper.toUserResponse(save);
+    }
 }

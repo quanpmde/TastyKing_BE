@@ -42,12 +42,13 @@ public class SercurityConfig {
                         .requestMatchers(HttpMethod.GET, "/category").permitAll()
                         .requestMatchers(HttpMethod.GET, "/combo").permitAll()
                         .requestMatchers(HttpMethod.GET, "/food/getReview/{foodID}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "oauth2/redirect").permitAll()
+                        .requestMatchers(HttpMethod.GET, "oauth2/redirectWithRedirectView").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ws/**").permitAll()
                         .anyRequest()
                         .authenticated()
         )
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
-                        httpSecurityOAuth2LoginConfigurer.defaultSuccessUrl("/oauth2/redirect", true)
+                        httpSecurityOAuth2LoginConfigurer.defaultSuccessUrl("/oauth2/redirectWithRedirectView", true)
                 );
 
 

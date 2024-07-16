@@ -38,6 +38,13 @@ public class UserController {
                 .result(userService.createNewCustomerByAdmin(request))
                 .build();
     }
+    @PostMapping("/account-staff")
+    public ApiResponse<String> createStaffAccount(@RequestBody @Valid CreateNewStaffRequest request){
+        return ApiResponse.<String>builder()
+                .result(userService.createNewStaffByAdmin(request))
+                .build();
+    }
+
     @PostMapping("/sendOTP")
     public ApiResponse<String> sendOTP(@RequestBody SendOTPRequest sendOTPRequest){
         return ApiResponse.<String>builder()
@@ -127,4 +134,27 @@ public class UserController {
                 .result(userService.blockAccount(userId))
                 .build();
     }
+
+    @GetMapping("/getStaff")
+    public ApiResponse<List<UserResponse>> getAllStaff(){
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllStaff())
+                .build();
+    }
+
+    @DeleteMapping("/{userId}")
+    public ApiResponse<String> deleteByUserID(@PathVariable("userId") int userId){
+        return ApiResponse.<String>builder()
+                .result(userService.deleteUerByID(userId))
+                .build();
+    }
+
+        @PutMapping("/updateStaff/{userId}")
+    public ApiResponse<UserResponse> updateStaff(@PathVariable("userId") int userId, @Valid @RequestBody UpdateStaffRequest request){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateStaff(userId, request))
+                .build();
+        }
+
+
 }

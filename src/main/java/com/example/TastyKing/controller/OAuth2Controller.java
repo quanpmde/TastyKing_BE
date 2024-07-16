@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.HashMap;
@@ -22,8 +23,8 @@ public class OAuth2Controller {
 
     @Autowired
     private AuthenticationService authenticationService;
-    @GetMapping("/redirect")
-    public RedirectView redirect(HttpServletRequest request) {
+    @GetMapping("/redirectWithRedirectView")
+    public RedirectView redirectWithUsingRedirectView(RedirectAttributes attributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         String email = oauthToken.getPrincipal().getAttribute("email");
@@ -35,8 +36,14 @@ public class OAuth2Controller {
         // Generate JWT token
         String token = authenticationService.generateToken(user);
 
-        // Redirect to front-end with token
-        String redirectUrl = "http://localhost:63343/TastyKing-FE/index.html?token=" + token;
+        // Add token as an attribute
+        attributes.addAttribute("token", token);
+
+        // Set the redirect URL
+        String redirectUrl = "http://localhost:63343/TastyKing-FE/index.html";
+
+        // Redirect to the front-end with the token
         return new RedirectView(redirectUrl);
     }
-    }
+
+}
