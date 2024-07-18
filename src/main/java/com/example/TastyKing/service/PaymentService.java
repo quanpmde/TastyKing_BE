@@ -5,6 +5,8 @@ import com.example.TastyKing.dto.request.PaymentRequest;
 import com.example.TastyKing.dto.response.PaymentResponse;
 import com.example.TastyKing.entity.Order;
 import com.example.TastyKing.entity.Payment;
+import com.example.TastyKing.entity.Tables;
+import com.example.TastyKing.enums.OrderStatus;
 import com.example.TastyKing.exception.AppException;
 import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.mapper.PaymentMapper;
@@ -56,18 +58,39 @@ public class PaymentService {
         payment.setOrder(order);
         payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
         payment.setPaymentDate(new Date());
-        payment.setPaymentDescription(order.getUser().getFullName() + "paying order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
+        payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
         // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
         order.setPayment(payment);
 
         // Nếu phương thức thanh toán là VNPAY, gọi createVNPayOrder
         String paymentUrl = null;
         if ("VNPAY".equals(payment.getPaymentMethod())) {
+
+            payment.setPaymentStatus("NOT_PAY_YET");
+            payment.setOrder(order);
+            payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
+            payment.setPaymentDate(new Date());
+            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
+            // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
+            order.setPayment(payment);
             String urlReturn = "http://localhost:8080/TastyKing"; // URL trả về của bạn
             paymentUrl = createVNPayOrder(totalAmount, "Payment for orderID: " + order.getOrderID(), urlReturn);
             orderService.confirmOrder(order.getOrderID());
         }
-
+        if (!request.getPaymentMethod().equalsIgnoreCase("VNPAY")){
+            payment.setOrder(order);
+            payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
+            payment.setPaymentDate(new Date());
+            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
+            // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
+            order.setPayment(payment);
+            payment.setPaymentMethod(request.getPaymentMethod());
+            order.setOrderStatus(OrderStatus.Done.name());
+            Tables tables;
+            tables = order.getTable();
+            tables.setTableStatus("Available");
+            payment.setPaymentStatus("PAID");
+        }
         // Lưu payment
         Payment newPayment = paymentRepository.save(payment);
 
