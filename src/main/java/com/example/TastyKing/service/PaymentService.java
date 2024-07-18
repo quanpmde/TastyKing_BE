@@ -56,7 +56,7 @@ public class PaymentService {
         payment.setOrder(order);
         payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
         payment.setPaymentDate(new Date());
-
+        payment.setPaymentDescription(order.getUser().getFullName() + "paying order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
         // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
         order.setPayment(payment);
 

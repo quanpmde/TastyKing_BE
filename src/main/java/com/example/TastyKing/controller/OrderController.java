@@ -89,6 +89,14 @@ public class OrderController {
                 .build();
     }
 
+    @PutMapping("/updateOrderByAdmin/{orderID}")
+    public ApiResponse<OrderResponse> updateOrderByAdmin(@PathVariable("orderID") Long orderID ,@RequestBody @Valid OrderUpdateRequest request){
+        logger.info("Received order request: {}", request);
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.updateOrderByAdmin(request))
+                .build();
+    }
+
     @PutMapping("/receiveTable/{orderID}")
     public ApiResponse<String> receiveTable(@PathVariable("orderID") Long orderID){
         return ApiResponse.<String>builder()

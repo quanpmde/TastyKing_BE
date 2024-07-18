@@ -30,7 +30,7 @@ public class OrderUpdateRequest {
     private Double totalAmount;
     private int numOfCustomer;
     private String customerName;
-    @OpenDateConstraint(message = "OPEN_DATE_INVALID")
+
     private LocalDateTime bookingDate;
     @Size(min = 10, message = "PHONE_INVALID")
     private String customerPhone;
