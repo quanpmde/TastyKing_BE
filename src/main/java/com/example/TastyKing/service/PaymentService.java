@@ -70,7 +70,7 @@ public class PaymentService {
             payment.setOrder(order);
             payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
             payment.setPaymentDate(new Date());
-            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
+            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + " Total: " + order.getTotalAmount() + "VND");
             // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
             order.setPayment(payment);
             String urlReturn = "http://localhost:8080/TastyKing"; // URL trả về của bạn
@@ -96,7 +96,7 @@ public class PaymentService {
 
         // Tạo response và thiết lập paymentUrl nếu có
         PaymentResponse paymentResponse = paymentMapper.toPaymentResponseWithUrl(newPayment, paymentUrl);
-        paymentResponse.setOrderId(order.getOrderID());
+        paymentResponse.setOrderID(order.getOrderID());
 
         // Cập nhật trạng thái của tất cả các order và bill nếu paymentStatus là "paid"
         if ("PAID".equals(payment.getPaymentStatus())) {
@@ -254,14 +254,31 @@ public class PaymentService {
     public List<PaymentResponse> getAllPayment(){
         List<Payment> payments = paymentRepository.findAllByOrderByPaymentDateDesc();
         return payments.stream()
-                .map(paymentMapper::toPaymentResponse)
+                .map(payment -> PaymentResponse
+                        .builder()
+                        .paymentID(payment.getPaymentID())
+                        .orderID(payment.getOrder().getOrderID())
+                        .paymentMethod(payment.getPaymentMethod())
+                        .paymentAmount(payment.getPaymentAmount())
+                        .paymentDate(payment.getPaymentDate())
+                        .paymentStatus(payment.getPaymentStatus())
+                        .paymentDescription(payment.getPaymentDescription())
+                        .build())
                 .collect(Collectors.toList());
     }
 
     public PaymentResponse getPaymentByID(int paymentID){
         Payment payment = paymentRepository.findById(paymentID).orElseThrow(() ->
                 new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
-        return paymentMapper.toPaymentResponse(payment);
+        return PaymentResponse.builder()
+                .paymentID(payment.getPaymentID())
+                .orderID(payment.getOrder().getOrderID())
+                .paymentMethod(payment.getPaymentMethod())
+                .paymentAmount(payment.getPaymentAmount())
+                .paymentDate(payment.getPaymentDate())
+                .paymentStatus(payment.getPaymentStatus())
+                .paymentDescription(payment.getPaymentDescription())
+                .build();
     }
 
     public List<PaymentResponse> getAllPaymentsByStatus(String paymentStatus) {

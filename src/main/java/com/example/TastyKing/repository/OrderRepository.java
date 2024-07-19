@@ -23,8 +23,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT YEAR(o.orderDate), MONTH(o.orderDate), SUM(o.totalAmount) " +
             "FROM Order o " +
-            "WHERE o.orderStatus = 'Processing' AND o.orderDate BETWEEN :start AND :end " +
+            "WHERE o.orderStatus = 'Done' AND o.orderDate BETWEEN :start AND :end " +
             "GROUP BY YEAR(o.orderDate), MONTH(o.orderDate)")
     List<Object[]> findMonthlyTotalAmountByStatusAndDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.orderID = :orderID")
+    Double findTotalAmountByOrderID(@Param("orderID") Long orderID);
 }
 

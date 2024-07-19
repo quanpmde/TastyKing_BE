@@ -109,4 +109,10 @@ public class OrderController {
                 .result(orderService.doneDeal(orderID))
                 .build();
     }
+    @GetMapping("/getTotal/{orderID}")
+    public ApiResponse<Double> getTotalAmount(@PathVariable("orderID") Long orderID){
+        return ApiResponse.<Double>builder()
+                .result(orderService.getTotalAmountByOrderID(orderID))
+                .build();
+    }
 }

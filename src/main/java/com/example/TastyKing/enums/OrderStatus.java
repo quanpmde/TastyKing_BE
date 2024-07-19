@@ -6,7 +6,7 @@ public enum OrderStatus {
     Confirmed,
     InProgressNotPaying,
     InProgress,
-    Done,
-    Updating
+    Done
+
 
 }

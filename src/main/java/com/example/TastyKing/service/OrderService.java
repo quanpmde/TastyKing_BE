@@ -315,7 +315,7 @@
                 if (payment != null) {
                     payment.setPaymentStatus("PAID");
                 }
-    
+
                 Tables table = order.getTable();
                 table.setTableStatus("Booked");
                 tableRepository.save(table);
@@ -766,6 +766,10 @@
                 logger.error("Error occurred while creating order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to create order", ex);
             }
+        }
+
+        public Double getTotalAmountByOrderID(Long orderID) {
+            return orderRepository.findTotalAmountByOrderID(orderID);
         }
 
     }

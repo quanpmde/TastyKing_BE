@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentResponse {
     private int paymentID;
-    private Long orderId;
+    private Long orderID;
     private String paymentStatus;
     private String paymentMethod;
     private String paymentDescription;
