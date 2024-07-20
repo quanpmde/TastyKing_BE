@@ -43,6 +43,9 @@ public class Order {
     @Column(name = "totalAmount", nullable = false)
     private Double totalAmount;
 
+    @Column(name = "deposit", nullable = true)
+    private Double deposit;
+
     @Column(name = "numOfCustomer")
     private int numOfCustomer;
 

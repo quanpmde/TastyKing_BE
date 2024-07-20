@@ -60,6 +60,12 @@ public class OrderController {
                 .result(orderService.cancelOrder(orderID))
                 .build();
     }
+    @PutMapping("/cancelOrderByAdmin/{orderID}")
+    public ApiResponse<String> cancelOrderByAdmin(@PathVariable("orderID") Long orderID){
+        return ApiResponse.<String>builder()
+                .result(orderService.cancelOrderByAdmin(orderID))
+                .build();
+    }
 
     @GetMapping
     public ApiResponse<List<OrderResponse>> getAllOrder(){

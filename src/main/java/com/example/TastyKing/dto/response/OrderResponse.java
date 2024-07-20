@@ -26,5 +26,6 @@ public class OrderResponse {
     private LocalDateTime bookingDate;
     private String customerPhone;
     private String orderStatus;
+    private Double deposit;
     private List<OrderDetailResponse> orderDetails;
 }

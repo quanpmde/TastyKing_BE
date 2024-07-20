@@ -39,6 +39,14 @@ public class PaymentController {
                 .result(paymentResponse)
                 .build();
     }
+    @PostMapping("/paymentByAdmin")
+    public ApiResponse<PaymentResponse> createPaymentByAdmin(@RequestBody @Valid PaymentRequest request) throws IOException {
+        PaymentResponse paymentResponse = paymentService.createNewPaymentByAdmin(request);
+
+        return ApiResponse.<PaymentResponse>builder()
+                .result(paymentResponse)
+                .build();
+    }
 
     @GetMapping
     public ApiResponse<List<PaymentResponse>> getAllPayment(){
@@ -70,8 +78,14 @@ public class PaymentController {
                 .result(updatedPayment)
                 .build();
     }
-
-    @PatchMapping("/update/{paymentID}")
+    @GetMapping("/getPayment/{orderID}")
+    public ApiResponse<PaymentResponse> getPaymentByOrderID(@PathVariable Long orderID) {
+        PaymentResponse paymentResponse = paymentService.getPaymentByOrderID(orderID);
+        return ApiResponse.<PaymentResponse>builder()
+                .result(paymentResponse)
+                .build();
+    }
+    @PutMapping("/update/{paymentID}")
     public ApiResponse<PaymentResponse> updatePayment(@PathVariable("paymentID") int paymentID, @RequestBody @Valid PaymentRequest request) {
         PaymentResponse updatedPayment = paymentService.updatePayment(paymentID, request);
         return ApiResponse.<PaymentResponse>builder()

@@ -85,11 +85,7 @@ public class PaymentService {
             // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
             order.setPayment(payment);
             payment.setPaymentMethod(request.getPaymentMethod());
-            order.setOrderStatus(OrderStatus.Done.name());
-            Tables tables;
-            tables = order.getTable();
-            tables.setTableStatus("Available");
-            payment.setPaymentStatus("PAID");
+            payment.setPaymentStatus("NOT_PAY_YET");
         }
         // Lưu payment
         Payment newPayment = paymentRepository.save(payment);
@@ -106,6 +102,51 @@ public class PaymentService {
         return paymentResponse;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public PaymentResponse createNewPaymentByAdmin(PaymentRequest request) throws IOException {
+        // Tìm order theo orderID từ request
+        Order order;
+        if (request.getOrderID() != null) {
+            order = orderRepository.findById(request.getOrderID()).orElseThrow(() ->
+                    new AppException(ErrorCode.ORDER_NOT_EXIST));
+        } else {
+            throw new AppException(ErrorCode.ORDERID_MUST_BE_PROVIDED);
+        }
+
+        // Tính tổng số tiền của tất cả các order cần thanh toán
+        int totalAmount = (int) Math.round(order.getTotalAmount());
+
+        // Tạo một payment mới và đặt trạng thái
+        Payment payment = paymentMapper.toPayment(request);
+        payment.setPaymentStatus("PAID"); // Set payment status to PAID
+        payment.setOrder(order);
+        payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
+        payment.setPaymentDate(new Date());
+        payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + " Total: " + order.getTotalAmount() + " VND");
+        payment.setPaymentMethod(request.getPaymentMethod());
+
+        // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
+        order.setPayment(payment);
+
+        // Lưu payment
+        Payment newPayment = paymentRepository.save(payment);
+
+        // Cập nhật trạng thái của tất cả các order và bill nếu paymentStatus là "paid"
+        if ("PAID".equalsIgnoreCase(payment.getPaymentStatus())) {
+            updatePaymentStatus(newPayment.getPaymentID(), payment.getPaymentStatus());
+            // Update order status to Done
+            order.setOrderStatus(OrderStatus.Done.name());
+            Tables tables = order.getTable();
+            tables.setTableStatus("Available");
+            orderRepository.save(order);
+        }
+
+        // Tạo response
+        PaymentResponse paymentResponse = paymentMapper.toPaymentResponseWithUrl(newPayment, null);
+        paymentResponse.setOrderID(order.getOrderID());
+
+        return paymentResponse;
+    }
     public String createVNPayOrder(int total, String orderInfor, String urlReturn){
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
@@ -238,7 +279,13 @@ public class PaymentService {
         if (paymentRequest.getPaymentStatus() != null) {
             payment.setPaymentStatus(paymentRequest.getPaymentStatus());
         }
+        payment.setPaymentDescription(payment.getOrder().getCustomerName() + " paying for order" + payment.getOrder().getOrderID() +" Total: " + payment.getPaymentAmount());
+        payment.setPaymentDate(new Date());
 
+        payment.setPaymentStatus("PAID");
+        payment.getOrder().setOrderStatus(OrderStatus.Done.name());
+        Tables tables = payment.getOrder().getTable();
+        tables.setTableStatus("Available");
         // Lưu thông tin payment cập nhật
         Payment updatedPayment = paymentRepository.save(payment);
 
@@ -249,6 +296,21 @@ public class PaymentService {
 
         // Trả về thông tin payment cập nhật
         return paymentMapper.toPaymentResponse(updatedPayment);
+    }
+
+    public PaymentResponse getPaymentByOrderID(Long orderID) {
+        Payment payment = paymentRepository.findByOrderOrderID(orderID)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
+        return PaymentResponse.builder()
+                .paymentID(payment.getPaymentID())
+                .paymentAmount(payment.getPaymentAmount())
+                .paymentMethod(payment.getPaymentMethod())
+                .orderID(payment.getOrder().getOrderID())
+                .paymentStatus(payment.getPaymentStatus())
+                .paymentDescription(payment.getPaymentDescription())
+                .paymentDate(payment.getPaymentDate())
+                .build();
+
     }
 
     public List<PaymentResponse> getAllPayment(){

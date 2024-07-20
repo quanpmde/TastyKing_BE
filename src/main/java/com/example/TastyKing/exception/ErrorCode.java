@@ -43,7 +43,8 @@ public enum ErrorCode {
     OUT_OF_TABLE(1035, "Number of table is out of stock", HttpStatus.BAD_REQUEST),
     PAYMENT_NOT_EXISTED(1036,"Payment has not exist",HttpStatus.BAD_REQUEST),
     ORDERID_MUST_BE_PROVIDED(1037,"Order ID must be provided",HttpStatus.BAD_REQUEST),
-    ONLY_PAY_OR_NOT_PAY_YET_IS_ALLOWED(1038,"Invalid status. Only 'paid' or 'not pay yet' is allowed.",HttpStatus.BAD_REQUEST);
+    ONLY_PAY_OR_NOT_PAY_YET_IS_ALLOWED(1038,"Invalid status. Only 'paid' or 'not pay yet' is allowed.",HttpStatus.BAD_REQUEST),
+    TABLE_HAS_BOOKED(1039, "Can't book this table. It has booked. Order will be cancel", HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

@@ -55,13 +55,14 @@
             try {
                 User user = userRepository.findByEmail(request.getUser().getEmail())
                         .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
-    
+
                 Tables tables = tableRepository.findById(request.getTables().getTableID())
                         .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
-    
-                if(tables.getTableStatus().equalsIgnoreCase("Booked") || tables.getTableStatus().equalsIgnoreCase("Serving")){
+
+                if (tables.getTableStatus().equalsIgnoreCase("Booked") || tables.getTableStatus().equalsIgnoreCase("Serving")) {
                     throw new AppException(ErrorCode.TABLE_NOT_EXIST);
                 }
+
                 Order order;
                 if (request.getOrderID() != null) {
                     // Update existing order
@@ -90,7 +91,7 @@
                             .orderStatus(OrderStatus.Processing.name())
                             .build();
                 }
-    
+
                 List<OrderDetail> orderDetails = request.getOrderDetails().stream()
                         .map(detail -> {
                             OrderDetailId detailId = new OrderDetailId(order.getOrderID(), detail.getFoodID());
@@ -104,15 +105,24 @@
                                     .build();
                         })
                         .collect(Collectors.toList());
-    
+
                 if (order.getOrderDetails() != null) {
                     order.getOrderDetails().addAll(orderDetails);
                 } else {
                     order.setOrderDetails(orderDetails);
                 }
-    
+
+                // Set deposit based on order details and table name
+                if (orderDetails.isEmpty()) {
+                    order.setDeposit(100000.0);
+                } else if ("Hall1".equalsIgnoreCase(tables.getTableName()) || "Hall2".equalsIgnoreCase(tables.getTableName())) {
+                    order.setDeposit(2000000.0);
+                } else {
+                    order.setDeposit(0.0);
+                }
+
                 Order savedOrder = orderRepository.save(order);
-    
+
                 return OrderResponse.builder()
                         .orderID(savedOrder.getOrderID())
                         .user(savedOrder.getUser())
@@ -125,6 +135,7 @@
                         .bookingDate(savedOrder.getBookingDate())
                         .customerPhone(savedOrder.getCustomerPhone())
                         .orderStatus(savedOrder.getOrderStatus())
+                        .deposit(savedOrder.getDeposit())
                         .orderDetails(savedOrder.getOrderDetails().stream()
                                 .map(detail -> OrderDetailResponse.builder()
                                         .foodID(detail.getFood().getFoodID())
@@ -196,6 +207,7 @@
                     .tables(order.getTable())
                     .orderDate(order.getOrderDate())
                     .note(order.getNote())
+                    .deposit(order.getDeposit())
                     .totalAmount(order.getTotalAmount())
                     .numOfCustomer(order.getNumOfCustomer())
                     .customerName(order.getCustomerName())
@@ -229,6 +241,7 @@
                     .tables(order.getTable())
                     .orderDate(order.getOrderDate())
                     .note(order.getNote())
+                    .deposit(order.getDeposit())
                     .totalAmount(order.getTotalAmount())
                     .numOfCustomer(order.getNumOfCustomer())
                     .customerName(order.getCustomerName())
@@ -269,6 +282,7 @@
             // Trả về phản hồi sau khi hủy đơn hàng thành công
             return "The order was successfully canceled. Please contact the restaurant for refund assistance";
         }
+
     
     
         @PreAuthorize("hasRole('ADMIN')")
@@ -281,6 +295,7 @@
                             .tables(order.getTable())
                             .orderDate(order.getOrderDate())
                             .note(order.getNote())
+                            .deposit(order.getDeposit())
                             .totalAmount(order.getTotalAmount())
                             .numOfCustomer(order.getNumOfCustomer())
                             .customerName(order.getCustomerName())
@@ -300,15 +315,52 @@
                     .collect(Collectors.toList());
         }
         @Transactional(rollbackFor = Exception.class)
+        @PreAuthorize("hasRole('ADMIN')")
+        public String cancelOrderByAdmin(Long orderID) {
+            try {
+                Order order = orderRepository.findById(orderID)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
 
+                // Fetch the table associated with the order
+                Tables table = tableRepository.findById(order.getTable().getTableID())
+                        .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+
+                // Check if the table is booked and if the booking is within the allowed cancellation period
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime bookingDateTime = order.getBookingDate();
+
+                if (!table.getTableStatus().equalsIgnoreCase("Booked")) {
+                    throw new RuntimeException("Table is not booked, cannot cancel order.");
+                }
+
+                // Update the order and table statuses
+                order.setOrderStatus(OrderStatus.Canceled.name());
+                table.setTableStatus("Available");
+
+                Order updatedOrder = orderRepository.save(order);
+                Tables updatedTable = tableRepository.save(table);
+
+                // Send cancellation email to the user
+                String userEmail = updatedOrder.getUser().getEmail();
+                emailUtil.sendOrderCancelEmail(userEmail, "" + updatedOrder.getOrderID());
+
+                return "The order was successfully canceled. Email has been sent to the customer.";
+            } catch (Exception ex) {
+                logger.error("Error occurred while canceling order: {}", ex.getMessage());
+                throw new RuntimeException("Failed to cancel order", ex);
+            }
+        }
+
+        @Transactional(rollbackFor = Exception.class)
+        @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
         public String confirmOrder(Long orderID) {
             try {
                 // Fetch the existing order
                 Order order = orderRepository.findById(orderID)
                         .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
-    
+
                 // Update the order status to "Confirmed"
-                order.setOrderStatus(OrderStatus.Confirmed.name());
+
 
                 // Update payment status to "PAID" if payment exists
                 Payment payment = order.getPayment();
@@ -317,21 +369,28 @@
                 }
 
                 Tables table = order.getTable();
-                table.setTableStatus("Booked");
-                tableRepository.save(table);
-                // Save the updated order
-                Order updatedOrder = orderRepository.save(order);
-    
-                // Send a confirmation email to the user
-                String userEmail = updatedOrder.getUser().getEmail();
-                emailUtil.sendOrderConfirmationEmail(userEmail, "" + updatedOrder.getOrderID());
-    
-                return "Order confirmed and confirmation email sent successfully.";
+                if (table.getTableStatus().equalsIgnoreCase("Available")) {
+
+                    table.setTableStatus("Booked");
+                    tableRepository.save(table);
+                    order.setOrderStatus(OrderStatus.Confirmed.name());
+                    // Save the updated order
+                    Order updatedOrder = orderRepository.save(order);
+
+                    // Send a confirmation email to the user
+                    String userEmail = updatedOrder.getUser().getEmail();
+                    emailUtil.sendOrderConfirmationEmail(userEmail, "" + updatedOrder.getOrderID());
+                    return "Order confirm successfull. Email has sent to customer";
+                }
+                else {
+                    return "Can't confirm order. This table has not exist";
+                }
             } catch (Exception ex) {
                 logger.error("Error occurred while confirming order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to confirm order", ex);
             }
         }
+
         @Transactional(rollbackFor = Exception.class)
         @PreAuthorize("hasRole('ADMIN')")
         public String receiveTable(Long orderID) {
@@ -442,7 +501,7 @@
                             .customerName(request.getCustomerName())
                             .bookingDate(request.getBookingDate())
                             .customerPhone(request.getCustomerPhone())
-                            .orderStatus(OrderStatus.InProgressNotPaying.name())
+                            .orderStatus(OrderStatus.Processing.name())
                             .build();
     
                     List<OrderDetail> orderDetails = request.getOrderDetails().stream()
@@ -516,6 +575,7 @@
                     order.setNumOfCustomer(request.getNumOfCustomer());
                     order.setCustomerName(request.getCustomerName());
                     order.setBookingDate(request.getBookingDate());
+
                     order.setCustomerPhone(request.getCustomerPhone());
                 } else {
                     // Create new order
@@ -529,6 +589,7 @@
                             .customerName(request.getCustomerName())
                             .bookingDate(request.getBookingDate())
                             .customerPhone(request.getCustomerPhone())
+                            .deposit(0.0)
                             .orderStatus(OrderStatus.InProgressNotPaying.name())
                             .build();
                 }
@@ -567,6 +628,7 @@
                         .numOfCustomer(savedOrder.getNumOfCustomer())
                         .customerName(savedOrder.getCustomerName())
                         .bookingDate(savedOrder.getBookingDate())
+                        .deposit(savedOrder.getDeposit())
                         .customerPhone(savedOrder.getCustomerPhone())
                         .orderStatus(savedOrder.getOrderStatus())
                         .orderDetails(savedOrder.getOrderDetails().stream()
