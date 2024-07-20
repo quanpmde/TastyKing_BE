@@ -1,9 +1,6 @@
     package com.example.TastyKing.service;
     
-    import com.example.TastyKing.dto.request.OrderDetailRequest;
-    import com.example.TastyKing.dto.request.OrderRequest;
-    import com.example.TastyKing.dto.request.OrderUpdateRequest;
-    import com.example.TastyKing.dto.request.UpdateOrderStatusRequest;
+    import com.example.TastyKing.dto.request.*;
     import com.example.TastyKing.dto.response.OrderDetailResponse;
     import com.example.TastyKing.dto.response.OrderResponse;
     import com.example.TastyKing.entity.*;
@@ -833,6 +830,55 @@
         public Double getTotalAmountByOrderID(Long orderID) {
             return orderRepository.findTotalAmountByOrderID(orderID);
         }
+        public OrderResponse updateOnlyOrderInfo(UpdateOrderInformation request, Long orderID) {
+            try {
+                // Find the order by ID
+                Order order = orderRepository.findById(orderID)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+                User user = userRepository.findByEmail(request.getUser().getEmail()).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+Tables tables = tableRepository.findById(request.getTables().getTableID()).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+                // Update order information
+                order.setUser(user);
+                order.setOrderDate(order.getOrderDate());
+                order.setNote(request.getNote());
+                order.setTable(tables);
+                order.setNumOfCustomer(request.getNumOfCustomer());
+                order.setCustomerName(request.getCustomerName());
+                order.setBookingDate(request.getBookingDate());
+                order.setCustomerPhone(request.getCustomerPhone());
+
+                // Save the updated order
+                Order savedOrder = orderRepository.save(order);
+
+                // Create and return response
+                return OrderResponse.builder()
+                        .orderID(savedOrder.getOrderID())
+                        .user(savedOrder.getUser())
+                        .tables(savedOrder.getTable())
+                        .orderDate(savedOrder.getOrderDate())
+                        .note(savedOrder.getNote())
+                        .totalAmount(savedOrder.getTotalAmount())
+                        .numOfCustomer(savedOrder.getNumOfCustomer())
+                        .customerName(savedOrder.getCustomerName())
+                        .bookingDate(savedOrder.getBookingDate())
+                        .customerPhone(savedOrder.getCustomerPhone())
+                        .orderStatus(savedOrder.getOrderStatus())
+                        .orderDetails(savedOrder.getOrderDetails().stream()
+                                .map(detail -> OrderDetailResponse.builder()
+                                        .foodID(detail.getFood().getFoodID())
+                                        .foodName(detail.getFood().getFoodName())
+                                        .foodPrice(detail.getFood().getFoodPrice())
+                                        .foodImage(detail.getFood().getFoodImage())
+                                        .quantity(detail.getQuantity())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .build();
+            } catch (Exception ex) {
+                logger.error("Error occurred while updating order info: {}", ex.getMessage());
+                throw new RuntimeException("Failed to update order info", ex);
+            }
+        }
+
 
     }
     

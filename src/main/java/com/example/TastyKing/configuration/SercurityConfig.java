@@ -27,7 +27,7 @@ public class SercurityConfig {
             "/users/regenerate-otp","/auth/login", "/food",
             "/food/{categoryID}", "/food/getFood/{foodID}",
             "/combo", "/combo/getCombo/{comboID}", "/table-position", "/table" ,"/table/{tablePositionID}", "/table/getTable/{tableID}",
-            "/voucher", "/voucher/{voucherID}", "/order", "/combo/getComboFood/{comboID}","/point/top5", "/check.html"
+            "/voucher", "/voucher/{voucherID}", "/order", "/combo/getComboFood/{comboID}","/point/top5"
     };
 
     private String signature ="OG3aRIYXHjOowyfI2MOHbl8xSjoF/B/XwkK6b276SfXAhL3KbizWWuT8LB1YUVvh";
@@ -49,7 +49,11 @@ public class SercurityConfig {
         )
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
                         httpSecurityOAuth2LoginConfigurer.defaultSuccessUrl("/oauth2/redirectWithRedirectView", true)
+                )
+                .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
+                        httpSecurityOAuth2LoginConfigurer.defaultSuccessUrl("/oauth2/redirectView", true)
                 );
+
 
 
 

@@ -107,7 +107,7 @@ public class PaymentController {
         model.addAttribute("paymentTime", paymentTime);
         model.addAttribute("transactionId", transactionId);
 
-        return paymentStatus == 1 ? "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderSuccess.html\" />" : "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderFail.html\" />";
+        return paymentStatus == 1 ? "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderFail.html\" />" : "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderSuccess.html\" />";
     }
 
 }

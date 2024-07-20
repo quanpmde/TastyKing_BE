@@ -2,6 +2,7 @@ package com.example.TastyKing.controller;
 
 import com.example.TastyKing.dto.request.OrderRequest;
 import com.example.TastyKing.dto.request.OrderUpdateRequest;
+import com.example.TastyKing.dto.request.UpdateOrderInformation;
 import com.example.TastyKing.dto.request.UpdateOrderStatusRequest;
 import com.example.TastyKing.dto.response.ApiResponse;
 import com.example.TastyKing.dto.response.OrderResponse;
@@ -119,6 +120,13 @@ public class OrderController {
     public ApiResponse<Double> getTotalAmount(@PathVariable("orderID") Long orderID){
         return ApiResponse.<Double>builder()
                 .result(orderService.getTotalAmountByOrderID(orderID))
+                .build();
+    }
+
+    @PutMapping("/updateOrderInfo/{orderID}")
+    public ApiResponse<OrderResponse> updateOrderInfo(@PathVariable("orderID") Long orderID, @RequestBody @Valid UpdateOrderInformation orderInformation){
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.updateOnlyOrderInfo(orderInformation, orderID))
                 .build();
     }
 }
