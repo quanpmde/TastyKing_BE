@@ -5,6 +5,7 @@ import com.example.TastyKing.dto.request.PaymentRequest;
 import com.example.TastyKing.dto.response.PaymentResponse;
 import com.example.TastyKing.entity.Order;
 import com.example.TastyKing.entity.Payment;
+import com.example.TastyKing.entity.RewardPoint;
 import com.example.TastyKing.entity.Tables;
 import com.example.TastyKing.enums.OrderStatus;
 import com.example.TastyKing.exception.AppException;
@@ -12,6 +13,7 @@ import com.example.TastyKing.exception.ErrorCode;
 import com.example.TastyKing.mapper.PaymentMapper;
 import com.example.TastyKing.repository.OrderRepository;
 import com.example.TastyKing.repository.PaymentRepository;
+import com.example.TastyKing.repository.RewardPointRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ public class PaymentService {
     private OrderRepository orderRepository;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private RewardPointRepository rewardPointRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public PaymentResponse createNewPayment(PaymentRequest request) throws IOException{
@@ -279,13 +283,17 @@ public class PaymentService {
         if (paymentRequest.getPaymentStatus() != null) {
             payment.setPaymentStatus(paymentRequest.getPaymentStatus());
         }
-        payment.setPaymentDescription(payment.getOrder().getCustomerName() + " paying for order" + payment.getOrder().getOrderID() +" Total: " + payment.getPaymentAmount());
+        payment.setPaymentDescription(payment.getOrder().getCustomerName() + " paying for order " + payment.getOrder().getOrderID() + " Total: " + payment.getPaymentAmount());
         payment.setPaymentDate(new Date());
 
         payment.setPaymentStatus("PAID");
         payment.getOrder().setOrderStatus(OrderStatus.Done.name());
         Tables tables = payment.getOrder().getTable();
         tables.setTableStatus("Available");
+
+        // Cập nhật reward points
+        updateRewardPoints(payment);
+
         // Lưu thông tin payment cập nhật
         Payment updatedPayment = paymentRepository.save(payment);
 
@@ -297,6 +305,30 @@ public class PaymentService {
         // Trả về thông tin payment cập nhật
         return paymentMapper.toPaymentResponse(updatedPayment);
     }
+
+    private void updateRewardPoints(Payment payment) {
+        double paymentAmount = payment.getPaymentAmount();
+        int pointsToAdd = 0;
+
+        if (paymentAmount > 1000000) {
+            pointsToAdd = 100;
+        } else if (paymentAmount > 800000) {
+            pointsToAdd = 80;
+        } else if (paymentAmount > 500000) {
+            pointsToAdd = 50;
+        } else if (paymentAmount > 200000) {
+            pointsToAdd = 20;
+        }
+
+        if (pointsToAdd > 0) {
+            RewardPoint rewardPoint = rewardPointRepository.findByUser(payment.getOrder().getUser())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NO_EXIST));
+
+            rewardPoint.setBalance(rewardPoint.getBalance() + pointsToAdd);
+            rewardPointRepository.save(rewardPoint);
+        }
+    }
+
 
     public PaymentResponse getPaymentByOrderID(Long orderID) {
         Payment payment = paymentRepository.findByOrderOrderID(orderID)
