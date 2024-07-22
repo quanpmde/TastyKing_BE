@@ -29,5 +29,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.orderID = :orderID")
     Double findTotalAmountByOrderID(@Param("orderID") Long orderID);
+    @Query("SELECT o FROM Order o ORDER BY o.orderID DESC")
+    List<Order> findAllOrderByOrderIDDesc();
+
 }
 

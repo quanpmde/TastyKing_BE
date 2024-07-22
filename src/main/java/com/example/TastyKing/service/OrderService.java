@@ -193,7 +193,7 @@
                 throw new RuntimeException("update status failed");
             }
         }
-    
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public OrderResponse getOrderByOrderID(Long orderID) {
             Order order = orderRepository.findById(orderID).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
     
@@ -256,6 +256,7 @@
                             .collect(Collectors.toList()))
                     .build();
         }
+
         public String cancelOrder(Long orderID) {
             Order order = orderRepository.findById(orderID)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
@@ -280,11 +281,11 @@
             return "The order was successfully canceled. Please contact the restaurant for refund assistance";
         }
 
-    
-    
-        @PreAuthorize("hasRole('ADMIN')")
+
+
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public List<OrderResponse> getAllOrder() {
-            List<Order> orders = orderRepository.findAll();
+            List<Order> orders = orderRepository.findAllOrderByOrderIDDesc();
             return orders.stream()
                     .map(order -> OrderResponse.builder()
                             .orderID(order.getOrderID())
@@ -311,8 +312,9 @@
                             .build())
                     .collect(Collectors.toList());
         }
+
         @Transactional(rollbackFor = Exception.class)
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public String cancelOrderByAdmin(Long orderID) {
             try {
                 Order order = orderRepository.findById(orderID)
@@ -389,7 +391,7 @@
         }
 
         @Transactional(rollbackFor = Exception.class)
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public String receiveTable(Long orderID) {
     
             // Fetch the existing order
@@ -414,7 +416,7 @@
             return "The customer has successfully received the table.";
         }
         @Transactional(rollbackFor = Exception.class)
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public String doneDeal(Long orderID) {
 
             // Fetch the existing order
@@ -550,7 +552,7 @@
         }
     
         @Transactional(rollbackFor = Exception.class)
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public OrderResponse createOrderByAdmin(OrderRequest request) {
             try {
                 User user = userRepository.findByEmail(request.getUser().getEmail())
@@ -703,7 +705,7 @@
             return monthlyTotalAmount;
         }
 
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         @Transactional(rollbackFor = Exception.class)
         public OrderResponse updateOrderByAdmin(OrderUpdateRequest request) {
             try {
