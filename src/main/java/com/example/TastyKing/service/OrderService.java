@@ -148,8 +148,8 @@
                 throw new RuntimeException("Failed to create order", ex);
             }
         }
-    
-    
+
+
         @Transactional(rollbackFor = Exception.class)
         @PreAuthorize("hasRole('ADMIN')")
         public OrderResponse updateOrderStatus(Long orderID, UpdateOrderStatusRequest request) {
@@ -193,7 +193,7 @@
                 throw new RuntimeException("update status failed");
             }
         }
-        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'USER')")
         public OrderResponse getOrderByOrderID(Long orderID) {
             Order order = orderRepository.findById(orderID).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
     

@@ -29,7 +29,7 @@ public class UpdateOrderInformation {
     @NotNull(message = "Total amount must not be null")
     private int numOfCustomer;
     private String customerName;
-    @OpenDateConstraint(message = "OPEN_DATE_INVALID")
+
     private LocalDateTime bookingDate;
     @Size(min = 10, message = "PHONE_INVALID")
     private String customerPhone;

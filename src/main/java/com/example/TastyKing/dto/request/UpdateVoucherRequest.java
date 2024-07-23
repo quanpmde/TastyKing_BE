@@ -1,6 +1,7 @@
 package com.example.TastyKing.dto.request;
 
 import com.example.TastyKing.validate.OpenDateConstraint;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class UpdateVoucherRequest {
     private Double updateExchangePoint;
 
     private LocalDateTime updateOpenDate;
+
     private LocalDateTime updateEndDate;
     private MultipartFile updateVoucherImage;
             private String updateDescription;

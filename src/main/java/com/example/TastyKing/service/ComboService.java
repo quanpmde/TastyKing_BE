@@ -61,7 +61,7 @@ public class ComboService {
 
 
 
-    @Scheduled(cron = "0 0 * * * ?") // Chạy mỗi phút
+    @Scheduled(cron = "0 * * * * ?") // Chạy mỗi phút
     public void deleteExpiredCombos() {
         LocalDateTime now = LocalDateTime.now();
         List<Combo> expiredCombos = comboRepository.findByEndDateBefore(now);

@@ -42,6 +42,7 @@ public class PaymentService {
     @Autowired
     private RewardPointRepository rewardPointRepository;
 
+
     @Transactional(rollbackFor = Exception.class)
     public PaymentResponse createNewPayment(PaymentRequest request) throws IOException{
         // Tìm order theo orderID từ request
@@ -69,28 +70,11 @@ public class PaymentService {
         // Nếu phương thức thanh toán là VNPAY, gọi createVNPayOrder
         String paymentUrl = null;
         if ("VNPAY".equals(payment.getPaymentMethod())) {
-
-            payment.setPaymentStatus("NOT_PAY_YET");
-            payment.setOrder(order);
-            payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
-            payment.setPaymentDate(new Date());
-            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + " Total: " + order.getTotalAmount() + "VND");
-            // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
-            order.setPayment(payment);
             String urlReturn = "http://localhost:8080/TastyKing"; // URL trả về của bạn
             paymentUrl = createVNPayOrder(totalAmount, "Payment for orderID: " + order.getOrderID(), urlReturn);
             orderService.confirmOrder(order.getOrderID());
         }
-        if (!request.getPaymentMethod().equalsIgnoreCase("VNPAY")){
-            payment.setOrder(order);
-            payment.setPaymentAmount(totalAmount); // Đặt paymentAmount
-            payment.setPaymentDate(new Date());
-            payment.setPaymentDescription(order.getCustomerName() + " paying for order: " + order.getOrderID() + "Total: " + order.getTotalAmount());
-            // Thiết lập lại mối quan hệ ngược (bi-directional relationship)
-            order.setPayment(payment);
-            payment.setPaymentMethod(request.getPaymentMethod());
-            payment.setPaymentStatus("NOT_PAY_YET");
-        }
+
         // Lưu payment
         Payment newPayment = paymentRepository.save(payment);
 

@@ -117,7 +117,7 @@ public class VoucherService {
     }
 
 
-    @Scheduled(cron = "0 0 0 * * ?") // Run daily at midnight
+    @Scheduled(cron = "0 * * * * ?") // Run daily at midnight
     public void updateExpiredVouchers() {
         List<Voucher> vouchers = voucherRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
