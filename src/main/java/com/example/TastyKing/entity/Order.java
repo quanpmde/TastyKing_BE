@@ -25,6 +25,10 @@ public class Order {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "voucherID", nullable = true)
+    private Voucher voucher;
+
+    @ManyToOne
     @JoinColumn(name = "tableID", nullable = false)
     private Tables table;
 

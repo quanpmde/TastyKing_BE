@@ -32,5 +32,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o ORDER BY o.orderID DESC")
     List<Order> findAllOrderByOrderIDDesc();
 
+    List<Order> findAllByOrderStatusAndBookingDateBefore(String orderStatus, LocalDateTime bookingDate);
 }
 

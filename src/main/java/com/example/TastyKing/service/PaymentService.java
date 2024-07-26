@@ -19,18 +19,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
@@ -370,5 +375,27 @@ public class PaymentService {
     }
 
 
+    public Map<String, Double> getMonthlyTotalAmountForLast12Months() {
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minus(12, ChronoUnit.MONTHS);
 
+        List<Object[]> results = paymentRepository.findMonthlyTotalPaymentAmountByStatusAndDateRange(start, end);
+        Map<String, Double> monthlyTotalAmount = new HashMap<>();
+
+        for (Object[] result : results) {
+            int year = (int) result[0];
+            int month = (int) result[1];
+            Number total = (Number) result[2];
+            Double totalAmount = total.doubleValue(); // Convert to Double safely
+            String key = year + "-" + (month < 10 ? "0" + month : month); // format YYYY-MM
+            monthlyTotalAmount.put(key, totalAmount);
+        }
+
+        // Log the results
+        logger.info("Monthly Total Payment Amount for the last 12 months: {}", monthlyTotalAmount);
+
+        return monthlyTotalAmount;
+    }
 }
+
+

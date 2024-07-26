@@ -110,4 +110,6 @@ public class PaymentController {
         return paymentStatus == 1 ? "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderFail.html\" />" : "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderSuccess.html\" />";
     }
 
+
+
 }

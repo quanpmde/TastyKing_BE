@@ -19,6 +19,8 @@
         private UserService userService;
         @Autowired
         private OrderService orderService;
+        @Autowired
+        private PaymentService paymentService;
         private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
         public Map<String, Object> getDailyReport(LocalDate date) {
             long numberOfOrders = orderService.getNumberOfOrdersInDay(date);
@@ -63,11 +65,11 @@
         }
 
         public Map<String, Double> getMonthlyRevenue() {
-            Map<String, Double> monthlyTotalAmount = orderService.getMonthlyTotalAmountForLast12Months();
+            Map<String, Double> monthlyPaymentAmount = paymentService.getMonthlyTotalAmountForLast12Months();
 
             // Log the results
-            logger.info("Monthly revenue report generated: {}", monthlyTotalAmount);
+            logger.info("Monthly revenue report generated: {}", monthlyPaymentAmount);
 
-            return monthlyTotalAmount;
+            return monthlyPaymentAmount;
         }
     }

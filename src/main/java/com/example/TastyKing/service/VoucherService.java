@@ -156,13 +156,11 @@ public class VoucherService {
             throw new AppException(ErrorCode.VOUCHER_NOT_ENOUGH);
         }
 
-        // Increment the number of times this voucher has been used
-        voucher.setNumberVoucherUsed(voucher.getNumberVoucherUsed() + 1);
+
         voucherRepository.save(voucher);
 
-        // Remove the voucher exchange record with the nearest exchange date
-        VoucherExchange voucherExchange = optionalVoucherExchange.get();
-        voucherExchangeRepository.delete(voucherExchange);
+
+
 
         return voucherMapper.toVoucherResponse(voucher);
     }

@@ -12,6 +12,7 @@
     import lombok.RequiredArgsConstructor;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.messaging.simp.SimpMessagingTemplate;
+    import org.springframework.scheduling.annotation.Scheduled;
     import org.springframework.security.access.prepost.PreAuthorize;
     import org.springframework.stereotype.Service;
     import org.slf4j.Logger;
@@ -22,10 +23,7 @@
     import java.time.LocalDateTime;
     import java.time.temporal.ChronoUnit;
     import java.time.temporal.TemporalAdjusters;
-    import java.util.Collections;
-    import java.util.HashMap;
-    import java.util.List;
-    import java.util.Map;
+    import java.util.*;
     import java.util.stream.Collectors;
     
     @Service
@@ -45,17 +43,28 @@
         private FoodRepository foodRepository;
         @Autowired
         private EmailUtil emailUtil;
-    
-    
+        @Autowired
+        private VoucherExchangeRepository voucherExchangeRepository;
+
         @Transactional(rollbackFor = Exception.class)
         public OrderResponse createOrder(OrderRequest request) {
             try {
+                // Retrieve the user
                 User user = userRepository.findByEmail(request.getUser().getEmail())
                         .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
 
+                // Retrieve the table
                 Tables tables = tableRepository.findById(request.getTables().getTableID())
                         .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
 
+                // Retrieve the voucher if present
+                Voucher voucher = null;
+                if (request.getVoucher() != null) {
+                    voucher = voucherRepository.findById(request.getVoucher().getVoucherId())
+                            .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_EXIST));
+                }
+
+                // Check table status
                 if (tables.getTableStatus().equalsIgnoreCase("Booked") || tables.getTableStatus().equalsIgnoreCase("Serving")) {
                     throw new AppException(ErrorCode.TABLE_NOT_EXIST);
                 }
@@ -65,19 +74,21 @@
                     // Update existing order
                     order = orderRepository.findById(request.getOrderID())
                             .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
-                    // Update order details if necessary (e.g., update total amount)
-                    order.setTotalAmount(order.getTotalAmount() + request.getTotalAmount());
+                    // Update order details
+                    order.setTotalAmount(request.getTotalAmount());
                     order.setOrderDate(LocalDateTime.now());
                     order.setNote(request.getNote());
                     order.setNumOfCustomer(request.getNumOfCustomer());
                     order.setCustomerName(request.getCustomerName());
                     order.setBookingDate(request.getBookingDate());
                     order.setCustomerPhone(request.getCustomerPhone());
+                    order.setVoucher(voucher);
                 } else {
                     // Create new order
                     order = Order.builder()
                             .user(user)
                             .table(tables)
+                            .voucher(voucher)
                             .orderDate(LocalDateTime.now())
                             .note(request.getNote())
                             .totalAmount(request.getTotalAmount())
@@ -89,6 +100,7 @@
                             .build();
                 }
 
+                // Map order details
                 List<OrderDetail> orderDetails = request.getOrderDetails().stream()
                         .map(detail -> {
                             OrderDetailId detailId = new OrderDetailId(order.getOrderID(), detail.getFoodID());
@@ -102,6 +114,7 @@
                                     .build();
                         })
                         .collect(Collectors.toList());
+
 
                 if (order.getOrderDetails() != null) {
                     order.getOrderDetails().addAll(orderDetails);
@@ -118,8 +131,10 @@
                     order.setDeposit(0.0);
                 }
 
+                // Save the order
                 Order savedOrder = orderRepository.save(order);
 
+                // Build response
                 return OrderResponse.builder()
                         .orderID(savedOrder.getOrderID())
                         .user(savedOrder.getUser())
@@ -358,37 +373,68 @@
                 Order order = orderRepository.findById(orderID)
                         .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
 
-                // Update the order status to "Confirmed"
-
-
-                // Update payment status to "PAID" if payment exists
-                Payment payment = order.getPayment();
-                if (payment != null) {
-                    payment.setPaymentStatus("PAID");
-                }
-
                 Tables table = order.getTable();
+                LocalDateTime now = LocalDateTime.now();
                 if (table.getTableStatus().equalsIgnoreCase("Available")) {
-
-                    table.setTableStatus("Booked");
+                    // Check if the booking time is within 2 hours from now
+                    if (order.getBookingDate().isBefore(now.plusHours(2))) {
+                        // Update the table status to "Booked"
+                        table.setTableStatus("Booked");
+                    }
                     tableRepository.save(table);
                     order.setOrderStatus(OrderStatus.Confirmed.name());
+
+                    // Update payment status to "PAID" if payment exists
+                    Payment payment = order.getPayment();
+                    if (payment != null) {
+                        payment.setPaymentStatus("PAID");
+                    }
+
+                    Voucher voucher = order.getVoucher();
+                    if (voucher != null) {
+                        User user = order.getUser();
+                        Optional<VoucherExchange> optionalVoucherExchange = voucherExchangeRepository
+                                .findTopByUserAndVoucherOrderByExchangeDateDesc(user, voucher);
+
+                        voucher.setNumberVoucherUsed(voucher.getNumberVoucherUsed() + 1);
+                        if (optionalVoucherExchange.isPresent()) {
+                            VoucherExchange voucherExchange = optionalVoucherExchange.get();
+                            voucherExchangeRepository.delete(voucherExchange);
+                        }
+                        voucherRepository.save(voucher);
+                    }
+
                     // Save the updated order
                     Order updatedOrder = orderRepository.save(order);
 
                     // Send a confirmation email to the user
                     String userEmail = updatedOrder.getUser().getEmail();
                     emailUtil.sendOrderConfirmationEmail(userEmail, "" + updatedOrder.getOrderID());
-                    return "Order confirm successfull. Email has sent to customer";
-                }
-                else {
-                    return "Can't confirm order. This table has not exist";
+
+                    return "Order confirm successful. Email has been sent to the customer";
+                } else {
+                    return "Can't confirm order. This table does not exist or is not available";
                 }
             } catch (Exception ex) {
                 logger.error("Error occurred while confirming order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to confirm order", ex);
             }
         }
+
+        @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+        public void updateTableStatus() {
+            LocalDateTime now = LocalDateTime.now();
+            List<Order> orders = orderRepository.findAllByOrderStatusAndBookingDateBefore(OrderStatus.Confirmed.name(), now.plusHours(2));
+
+            for (Order order : orders) {
+                Tables table = order.getTable();
+                if (table.getTableStatus().equalsIgnoreCase("Available")) {
+                    table.setTableStatus("Booked");
+                    tableRepository.save(table);
+                }
+            }
+        }
+
 
         @Transactional(rollbackFor = Exception.class)
         @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")

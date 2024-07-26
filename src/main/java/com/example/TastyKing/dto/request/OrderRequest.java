@@ -6,6 +6,7 @@ import com.example.TastyKing.entity.User;
 import com.example.TastyKing.entity.Voucher;
 import com.example.TastyKing.validate.OpenDateConstraint;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class OrderRequest {
     @NotNull(message = "Table must not be null")
     private Tables tables;
 
+    private Voucher voucher;
     private LocalDateTime orderDate;
     private String note;
     @NotNull(message = "Total amount must not be null")
