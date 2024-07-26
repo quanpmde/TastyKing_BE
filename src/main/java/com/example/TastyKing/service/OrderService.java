@@ -343,9 +343,7 @@
                 LocalDateTime now = LocalDateTime.now();
                 LocalDateTime bookingDateTime = order.getBookingDate();
 
-                if (!table.getTableStatus().equalsIgnoreCase("Booked")) {
-                    throw new RuntimeException("Table is not booked, cannot cancel order.");
-                }
+
 
                 // Update the order and table statuses
                 order.setOrderStatus(OrderStatus.Canceled.name());
