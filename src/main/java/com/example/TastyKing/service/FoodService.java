@@ -127,7 +127,7 @@ public class FoodService {
                     .map(review -> ReviewResponse.builder()
                             .reviewId(review.getReviewId())
                             .user(review.getUser())
-                            .food(review.getFood())
+                            .foodName(review.getFood().getFoodName())
                             .reviewText(review.getReviewText())
                             .rating(review.getRating())
                             .reviewDate(review.getReviewDate())

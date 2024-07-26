@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ReviewResponse {
     private Integer reviewId;
     private User user;
-    private Food food;
+    private String foodName;
     private String reviewText;
     private int rating;
     private LocalDateTime reviewDate;

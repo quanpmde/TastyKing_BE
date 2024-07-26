@@ -26,10 +26,23 @@ public class ReviewController {
     }
 
 
-    @DeleteMapping("/{reviewID}")
-    public ApiResponse<String> deleteReview(@PathVariable("reviewID") Integer reviewID){
+    @DeleteMapping("/{reviewId}")
+    public ApiResponse<String> deleteReview(@PathVariable("reviewId") Integer reviewId){
         return ApiResponse.<String>builder()
-                .result(reviewService.deleteReview(reviewID))
+                .result(reviewService.deleteReview(reviewId))
+                .build();
+    }
+    @GetMapping
+    public ApiResponse<List<ReviewResponse>> getAllReview(){
+        return ApiResponse.<List<ReviewResponse>>builder()
+                .result(reviewService.getAllReview())
+                .build();
+    }
+
+    @GetMapping("/{reviewId}")
+    public ApiResponse<ReviewResponse> getReview(@PathVariable("reviewId") Integer reviewId){
+        return ApiResponse.<ReviewResponse>builder()
+                .result(reviewService.getReviewByID(reviewId))
                 .build();
     }
 }
