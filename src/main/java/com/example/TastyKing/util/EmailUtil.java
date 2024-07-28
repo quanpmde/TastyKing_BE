@@ -59,7 +59,27 @@ public class EmailUtil {
         mimeMessageHelper.setText(String.format("""
                 <div>
                     Tasty King restaurant</br>
+                    
                     Your order has been canceled. Order ID: <strong>%s</strong>
+                    We will refund you within 24 hours of receiving this email.
+                    We will contact you as soon as possible. We are so sorry for the inconvenience caused!
+                    If you have any questions,feel free to ask, please contact: +84386656642
+                    Sincerely!
+                    
+                </div>
+                """, orderId), true);
+        javaMailSender.send(mimeMessage);
+    }
+    public void sendRequestOrderCancelFromAdminEmail(String email, String orderId) throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        mimeMessageHelper.setFrom("tuandoiphuyen@gmail.com");
+        mimeMessageHelper.setTo(email);
+        mimeMessageHelper.setSubject("Order Cancel");
+        mimeMessageHelper.setText(String.format("""
+                <div>
+                    Tasty King restaurant</br>
+                    Your order has not been accepted. You need to fill in your personal information so we can refund you. Order ID: <strong>%s</strong>
 
                    If you have already paid. Please contact the restaurant to receive a refund
                     If you have any questions, please contact: 0386656642

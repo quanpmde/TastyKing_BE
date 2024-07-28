@@ -35,6 +35,8 @@ public class Order {
 
     @OneToOne(mappedBy = "order")
     private Payment payment;
+    @OneToOne(mappedBy = "order")
+    private Refund refund;
 
     @Column(name = "orderStatus", length = 50)
     private String orderStatus;

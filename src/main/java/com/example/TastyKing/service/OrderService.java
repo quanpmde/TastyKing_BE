@@ -45,7 +45,10 @@
         private EmailUtil emailUtil;
         @Autowired
         private VoucherExchangeRepository voucherExchangeRepository;
-
+        @Autowired
+        private PaymentRepository paymentRepository;
+        @Autowired
+        private RefundRepository refundRepository;
         @Transactional(rollbackFor = Exception.class)
         public OrderResponse createOrder(OrderRequest request) {
             try {
@@ -75,7 +78,10 @@
                 LocalDateTime twoHoursAfter = requestedBookingDate.plusHours(2);
 
                 List<Order> conflictingOrders = orderRepository.findByTableAndBookingDateBetween(tables, twoHoursBefore, twoHoursAfter);
-                if (!conflictingOrders.isEmpty()) {
+                boolean hasActiveOrder = conflictingOrders.stream()
+                        .anyMatch(order -> !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Canceled.name()));
+
+                if (hasActiveOrder) {
                     throw new AppException(ErrorCode.TABLE_ALREADY_BOOKED);
                 }
 
@@ -289,28 +295,68 @@
         public String cancelOrder(Long orderID) {
             Order order = orderRepository.findById(orderID)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
-    
+
             // Lấy thời gian hiện tại và thời gian nhận bàn
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime bookingDateTime = order.getBookingDate();
-    
+
             // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
             if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
                 throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
             }
-    
+
             // Cập nhật trạng thái đơn hàng nếu hủy hợp lệ
             Tables tables = tableRepository.findById(order.getTable().getTableID()).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
-    
-            order.setOrderStatus(OrderStatus.Canceled.name());
+
+            order.setOrderStatus(OrderStatus.PendingCancellation.name());
             tables.setTableStatus("Available");
+
+            Payment payment = paymentRepository.findByOrderOrderID(orderID)
+                    .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
+
+            payment.setPaymentStatus("WAIT_FOR_ACCEPT");
+            paymentRepository.save(payment);
+
             Order updatedOrder = orderRepository.save(order);
             Tables tablesUpdate = tableRepository.save(tables);
             // Trả về phản hồi sau khi hủy đơn hàng thành công
-            return "The order was successfully canceled. Please contact the restaurant for refund assistance";
+            return "Your request has been sent to us. Your order will be refunded as soon as possible. Please contact the restaurant for refund assistance if any problem occurs";
         }
 
+        @Transactional(rollbackFor = Exception.class)
+        @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+        public String requestCancelOrderByAdmin(Long orderID) {
+            try {
+                Order order = orderRepository.findById(orderID)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
 
+                // Fetch the table associated with the order
+                Tables table = tableRepository.findById(order.getTable().getTableID())
+                        .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
+
+                // Check if the table is booked and if the booking is within the allowed cancellation period
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime bookingDateTime = order.getBookingDate();
+
+
+
+                // Update the order and table statuses
+                order.setOrderStatus(OrderStatus.CancelByRestaurant.name());
+                table.setTableStatus("Available");
+
+                Order updatedOrder = orderRepository.save(order);
+                Tables updatedTable = tableRepository.save(table);
+
+                // Send cancellation email to the user
+                String userEmail = updatedOrder.getUser().getEmail();
+                emailUtil.sendRequestOrderCancelFromAdminEmail(userEmail, "" + updatedOrder.getOrderID());
+
+                return "Cancel Order Request from Restaurant. Email has been sent to the customer.";
+            } catch (Exception ex) {
+                logger.error("Error occurred while canceling order: {}", ex.getMessage());
+                throw new RuntimeException("Failed to cancel order", ex);
+            }
+        }
 
         @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public List<OrderResponse> getAllOrder() {
@@ -353,15 +399,23 @@
                 Tables table = tableRepository.findById(order.getTable().getTableID())
                         .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
 
-                // Check if the table is booked and if the booking is within the allowed cancellation period
-                LocalDateTime now = LocalDateTime.now();
-                LocalDateTime bookingDateTime = order.getBookingDate();
-
-
-
                 // Update the order and table statuses
                 order.setOrderStatus(OrderStatus.Canceled.name());
                 table.setTableStatus("Available");
+
+                // Update the paymentStatus
+                Payment payment = paymentRepository.findByOrderOrderID(orderID)
+                        .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
+
+                payment.setPaymentStatus("IS_REFUNDED");
+                paymentRepository.save(payment);
+
+                // Update the paymentStatus
+                Refund refund = refundRepository.findByOrderOrderID(orderID)
+                        .orElseThrow(() -> new AppException(ErrorCode.REFUND_NOT_EXIST));
+
+                refund.setRefundStatus("ACCEPTED");
+                refundRepository.save(refund);
 
                 Order updatedOrder = orderRepository.save(order);
                 Tables updatedTable = tableRepository.save(table);

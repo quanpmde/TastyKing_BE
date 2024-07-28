@@ -6,7 +6,9 @@ public enum OrderStatus {
     Confirmed,
     InProgressNotPaying,
     InProgress,
-    Done
+    Done,
+    PendingCancellation,
+    CancelByRestaurant
 
 
 }

@@ -28,7 +28,7 @@ public class OAuth2Controller {
     @Autowired
     private AuthenticationService authenticationService;
 
-    @GetMapping("/redirectWithRedirectView")
+    @GetMapping("/redirectView")
     public String handlePaymentReturn(HttpServletRequest request, Model model){
         int paymentStatus = paymentService.orderReturn(request);
 
@@ -44,26 +44,26 @@ public class OAuth2Controller {
 
         return paymentStatus == 1 ? "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderFail.html\" />" : "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:63343/tastyKing-FE/orderSuccess.html\" />";
     }
-    @GetMapping("/redirectView")
-    public RedirectView redirectWithUsingRedirectView(RedirectAttributes attributes) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        String email = oauthToken.getPrincipal().getAttribute("email");
-        String name = oauthToken.getPrincipal().getAttribute("name");
-
-        // Save user details to the database
-        User user = authenticationService.saveOAuth2User(email, name);
-
-        // Generate JWT token
-        String token = authenticationService.generateToken(user);
-
-        // Add token as an attribute
-        attributes.addAttribute("token", token);
-
-        // Set the redirect URL
-        String redirectUrl = "http://localhost:63343/TastyKing-FE/index.html";
-
-        // Redirect to the front-end with the token
-        return new RedirectView(redirectUrl);
-    }
+//    @GetMapping("/redirectView")
+//    public RedirectView redirectWithUsingRedirectView(RedirectAttributes attributes) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+//        String email = oauthToken.getPrincipal().getAttribute("email");
+//        String name = oauthToken.getPrincipal().getAttribute("name");
+//
+//        // Save user details to the database
+//        User user = authenticationService.saveOAuth2User(email, name);
+//
+//        // Generate JWT token
+//        String token = authenticationService.generateToken(user);
+//
+//        // Add token as an attribute
+//        attributes.addAttribute("token", token);
+//
+//        // Set the redirect URL
+//        String redirectUrl = "http://localhost:63343/TastyKing-FE/index.html";
+//
+//        // Redirect to the front-end with the token
+//        return new RedirectView(redirectUrl);
+//    }
 }
