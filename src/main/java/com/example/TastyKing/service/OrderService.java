@@ -69,6 +69,16 @@
                     throw new AppException(ErrorCode.TABLE_NOT_EXIST);
                 }
 
+                // Check if there are any existing orders for the table with a booking date within 2 hours of the requested booking date
+                LocalDateTime requestedBookingDate = request.getBookingDate();
+                LocalDateTime twoHoursBefore = requestedBookingDate.minusHours(2);
+                LocalDateTime twoHoursAfter = requestedBookingDate.plusHours(2);
+
+                List<Order> conflictingOrders = orderRepository.findByTableAndBookingDateBetween(tables, twoHoursBefore, twoHoursAfter);
+                if (!conflictingOrders.isEmpty()) {
+                    throw new AppException(ErrorCode.TABLE_ALREADY_BOOKED);
+                }
+
                 Order order;
                 if (request.getOrderID() != null) {
                     // Update existing order
@@ -115,7 +125,6 @@
                         })
                         .collect(Collectors.toList());
 
-
                 if (order.getOrderDetails() != null) {
                     order.getOrderDetails().addAll(orderDetails);
                 } else {
@@ -158,11 +167,16 @@
                                         .build())
                                 .collect(Collectors.toList()))
                         .build();
+            } catch (AppException ex) {
+                logger.error("Error occurred while creating order: {}", ex.getMessage());
+                throw ex;
             } catch (Exception ex) {
                 logger.error("Error occurred while creating order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to create order", ex);
             }
         }
+
+
 
 
         @Transactional(rollbackFor = Exception.class)

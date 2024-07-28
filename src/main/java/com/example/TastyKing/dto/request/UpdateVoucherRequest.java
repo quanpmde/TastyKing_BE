@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
 public class UpdateVoucherRequest {
 
 
-    private String updateVoucherTitle;
-    private int updateDiscount;
-    private int updateQuantity;
-    private Double updateExchangePoint;
+    private String voucherTitle;
+    private int discount;
+    private int quantity;
+    private Double point;
 
     private LocalDateTime updateOpenDate;
 
-    private LocalDateTime updateEndDate;
+    private LocalDateTime updateenddate;
     private MultipartFile updateVoucherImage;
             private String updateDescription;
 }

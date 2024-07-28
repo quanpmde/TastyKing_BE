@@ -46,7 +46,9 @@ public enum ErrorCode {
     ONLY_PAY_OR_NOT_PAY_YET_IS_ALLOWED(1038,"Invalid status. Only 'paid' or 'not pay yet' is allowed.",HttpStatus.BAD_REQUEST),
     TABLE_HAS_BOOKED(1039, "Can't book this table. It has booked. Order will be cancel", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_EXIST(1040, "Can not find review", HttpStatus.BAD_REQUEST),
-    ORDER_NOT_DONE(1041, "User can't leave a review. Please complete a order to continue.", HttpStatus.BAD_REQUEST);
+    ORDER_NOT_DONE(1041, "User can't leave a review. Please complete a order to continue.", HttpStatus.BAD_REQUEST),
+    FEEDBACK_NOT_FOUND(1042, "Feedback doesn't found", HttpStatus.BAD_REQUEST),
+    TABLE_ALREADY_BOOKED(1043, "Order fail. This table has been booked on this time. Please choose another table or choose another time", HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

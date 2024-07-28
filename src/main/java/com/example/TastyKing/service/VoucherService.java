@@ -80,11 +80,11 @@ public class VoucherService {
 
         // Update fields based on the request
         voucher.setVoucherStartDate(request.getUpdateOpenDate());
-        voucher.setVoucherDueDate(request.getUpdateEndDate());
-        voucher.setVoucherTitle(request.getUpdateVoucherTitle());
-        voucher.setVoucherDiscount(request.getUpdateDiscount());
-        voucher.setVoucherQuantity(request.getUpdateQuantity());
-        voucher.setVoucherExchangePoint(request.getUpdateExchangePoint());
+        voucher.setVoucherDueDate(request.getUpdateenddate());
+        voucher.setVoucherTitle(request.getVoucherTitle());
+        voucher.setVoucherDiscount(request.getDiscount());
+        voucher.setVoucherQuantity(request.getQuantity());
+        voucher.setVoucherExchangePoint(request.getPoint());
         voucher.setVoucherDescribe(request.getUpdateDescription());
 
         // Handle image update only if a new image is provided

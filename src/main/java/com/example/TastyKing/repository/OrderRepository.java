@@ -1,6 +1,7 @@
 package com.example.TastyKing.repository;
 
 import com.example.TastyKing.entity.Order;
+import com.example.TastyKing.entity.Tables;
 import com.example.TastyKing.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -35,5 +36,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByOrderStatusAndBookingDateBefore(String orderStatus, LocalDateTime bookingDate);
     boolean existsByUserAndOrderStatus(User user, String orderStatus);
+
+    List<Order> findByTableAndBookingDateBetween(Tables tables, LocalDateTime twoHoursBefore, LocalDateTime twoHoursAfter);
 }
 
