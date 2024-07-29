@@ -6,6 +6,7 @@
     import com.example.TastyKing.entity.*;
     import com.example.TastyKing.enums.OrderStatus;
     import com.example.TastyKing.exception.AppException;
+    import com.example.TastyKing.exception.CustomException;
     import com.example.TastyKing.exception.ErrorCode;
     import com.example.TastyKing.repository.*;
     import com.example.TastyKing.util.EmailUtil;
@@ -19,6 +20,7 @@
     import org.slf4j.LoggerFactory;
     import org.springframework.transaction.annotation.Transactional;
 
+    import java.time.Duration;
     import java.time.LocalDate;
     import java.time.LocalDateTime;
     import java.time.temporal.ChronoUnit;
@@ -68,8 +70,8 @@
                 }
 
                 // Check table status
-                if (tables.getTableStatus().equalsIgnoreCase("Booked") || tables.getTableStatus().equalsIgnoreCase("Serving")) {
-                    throw new AppException(ErrorCode.TABLE_NOT_EXIST);
+                if (!tables.getTableStatus().equalsIgnoreCase("Available")) {
+                    throw new AppException(ErrorCode.TABLE_HAS_BOOKED);
                 }
 
                 // Check if there are any existing orders for the table with a booking date within 2 hours of the requested booking date
@@ -79,10 +81,20 @@
 
                 List<Order> conflictingOrders = orderRepository.findByTableAndBookingDateBetween(tables, twoHoursBefore, twoHoursAfter);
                 boolean hasActiveOrder = conflictingOrders.stream()
-                        .anyMatch(order -> !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Canceled.name()));
+                        .anyMatch(order -> !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Canceled.name()) &&
+                                !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Done.name()));
 
                 if (hasActiveOrder) {
-                    throw new AppException(ErrorCode.TABLE_ALREADY_BOOKED);
+                    String bookedTimes = conflictingOrders.stream()
+                            .filter(order -> !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Canceled.name()) &&
+                                    !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Done.name())
+                                    && !order.getOrderStatus().equalsIgnoreCase(OrderStatus.Processing.name()))
+                            .map(order -> order.getBookingDate().toString())
+                            .collect(Collectors.joining(", "));
+
+                    throw new CustomException("Order fail. This table has been booked on: " + bookedTimes
+                            + ".\nThe time you requested is within the blocked hours from "
+                            + twoHoursBefore +  ". Please choose another table or choose another time.");
                 }
 
                 Order order;
@@ -176,11 +188,18 @@
             } catch (AppException ex) {
                 logger.error("Error occurred while creating order: {}", ex.getMessage());
                 throw ex;
+            } catch (CustomException ex) {
+                logger.error("Error occurred while creating order: {}", ex.getMessage());
+                throw ex;
             } catch (Exception ex) {
                 logger.error("Error occurred while creating order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to create order", ex);
             }
         }
+
+
+
+
 
 
 
@@ -297,13 +316,13 @@
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
 
             // Lấy thời gian hiện tại và thời gian nhận bàn
-//            LocalDateTime now = LocalDateTime.now();
-//            LocalDateTime bookingDateTime = order.getBookingDate();
-//
-//            // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
-//            if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
-//                throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
-//            }
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime bookingDateTime = order.getBookingDate();
+
+            // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
+            if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
+                throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
+            }
 
             // Cập nhật trạng thái đơn hàng nếu hủy hợp lệ
             Tables tables = tableRepository.findById(order.getTable().getTableID()).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));
@@ -338,6 +357,10 @@
                 LocalDateTime now = LocalDateTime.now();
                 LocalDateTime bookingDateTime = order.getBookingDate();
 
+                // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
+                if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
+                    throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
+                }
 
 
                 // Update the order and table statuses
@@ -352,11 +375,15 @@
                 emailUtil.sendRequestOrderCancelFromAdminEmail(userEmail, "" + updatedOrder.getOrderID());
 
                 return "Cancel Order Request from Restaurant. Email has been sent to the customer.";
+            } catch (AppException ex) {
+                logger.error("Error occurred while canceling order: {}", ex.getMessage());
+                throw ex;
             } catch (Exception ex) {
                 logger.error("Error occurred while canceling order: {}", ex.getMessage());
                 throw new RuntimeException("Failed to cancel order", ex);
             }
         }
+
 
         @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
         public List<OrderResponse> getAllOrder() {

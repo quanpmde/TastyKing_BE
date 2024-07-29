@@ -34,7 +34,7 @@ public class AuthenticationService {
 
         );
         if(user.getActive()==0){
-            throw new AppException(ErrorCode.EMAIL_NOT_EXISTED);
+            throw new AppException(ErrorCode.USER_IS_BANNED);
         }
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
         if (!authenticated)

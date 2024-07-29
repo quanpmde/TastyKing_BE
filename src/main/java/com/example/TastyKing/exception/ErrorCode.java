@@ -49,7 +49,8 @@ public enum ErrorCode {
     ORDER_NOT_DONE(1041, "User can't leave a review. Please complete a order to continue.", HttpStatus.BAD_REQUEST),
     FEEDBACK_NOT_FOUND(1042, "Feedback doesn't found", HttpStatus.BAD_REQUEST),
     TABLE_ALREADY_BOOKED(1043, "Order fail. This table has been booked on this time. Please choose another table or choose another time", HttpStatus.BAD_REQUEST),
-    REFUND_NOT_EXIST(1044, "Refun has not exist",HttpStatus.BAD_REQUEST);
+    REFUND_NOT_EXIST(1044, "Refun has not exist",HttpStatus.BAD_REQUEST),
+    USER_IS_BANNED(1045, "User is banned",HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

@@ -49,6 +49,15 @@ private static final Logger logger = LoggerFactory.getLogger(GlobalHandleExcepti
         logger.error("AppException: Code: {}, Message: {}", errorCode.getCode(), errorCode.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
+    @ExceptionHandler(value = CustomException.class)
+    public ResponseEntity<ApiResponse> handleCustomException(CustomException exception) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(1001);  // Mã lỗi tùy chỉnh
+        apiResponse.setMessage(exception.getMessage());
+
+        logger.error("CustomException: Message: {}", exception.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleMethodArgument(MethodArgumentNotValidException exception) {
