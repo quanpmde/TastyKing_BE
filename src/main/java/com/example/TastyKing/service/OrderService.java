@@ -297,13 +297,13 @@
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
 
             // Lấy thời gian hiện tại và thời gian nhận bàn
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime bookingDateTime = order.getBookingDate();
-
-            // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
-            if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
-                throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
-            }
+//            LocalDateTime now = LocalDateTime.now();
+//            LocalDateTime bookingDateTime = order.getBookingDate();
+//
+//            // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
+//            if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
+//                throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
+//            }
 
             // Cập nhật trạng thái đơn hàng nếu hủy hợp lệ
             Tables tables = tableRepository.findById(order.getTable().getTableID()).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_EXIST));

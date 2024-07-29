@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +46,14 @@ public class RefundService {
         } else {
             throw new AppException(ErrorCode.ORDERID_MUST_BE_PROVIDED);
         }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime bookingDateTime = order.getBookingDate();
+
+        // Kiểm tra xem thời gian hiện tại có trước 24 tiếng so với thời gian nhận bàn không
+        if (ChronoUnit.HOURS.between(now, bookingDateTime) < 24) {
+            throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
+        }
+
 
         String relativeImagePath = saveImage(request.getRefundImage());
 

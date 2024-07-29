@@ -42,7 +42,8 @@ public class BillService {
             Paragraph customerInfo = new Paragraph(
                     "Customer Name: " + order.getCustomerName() + "\n" +
                             "Phone: " + order.getCustomerPhone() +"\n"
-                    +   "Booking Date: " + order.getBookingDate(),
+                    +   "Booking Date: " + order.getBookingDate() + "\n" +
+                            "Table: " + order.getTables().getTableName() ,
                     normalFont
             );
             customerInfo.setSpacingBefore(20);
@@ -73,7 +74,10 @@ public class BillService {
             document.add(table);
 
             // Total amount
-            Paragraph totalAmount = new Paragraph("Total Amount: " + order.getTotalAmount(), normalFont);
+            Paragraph deposit = new Paragraph("Deposit: " + order.getDeposit() + "VND", normalFont);
+            deposit.setSpacingBefore(20);
+            document.add(deposit);
+            Paragraph totalAmount = new Paragraph("Total Amount: " + order.getTotalAmount() + "VND", normalFont);
             totalAmount.setSpacingBefore(20);
             document.add(totalAmount);
 

@@ -4,10 +4,13 @@ import com.example.TastyKing.dto.request.RefundRequest;
 import com.example.TastyKing.dto.request.UpdateRefundRequest;
 import com.example.TastyKing.dto.response.ApiResponse;
 import com.example.TastyKing.dto.response.RefundResponse;
+import com.example.TastyKing.exception.AppException;
 import com.example.TastyKing.service.RefundService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -22,10 +25,18 @@ public class RefundController {
     private RefundService refundService;
 
     @PostMapping
-    public ApiResponse<RefundResponse> createNewRefund(@ModelAttribute @RequestBody @Valid RefundRequest request) throws IOException {
-        return ApiResponse.<RefundResponse>builder()
-                .result(refundService.createNewRefund(request))
-                .build();
+    public ResponseEntity<ApiResponse<RefundResponse>> createNewRefund(@ModelAttribute @RequestBody @Valid RefundRequest request) throws IOException {
+        try {
+            RefundResponse response = refundService.createNewRefund(request);
+            return ResponseEntity.ok(ApiResponse.<RefundResponse>builder().result(response).build());
+        } catch (AppException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ApiResponse.<RefundResponse>builder()
+                            .code(e.getErrorCode().getCode())
+                            .message(e.getMessage())
+                            .build()
+            );
+        }
     }
 
     @GetMapping
